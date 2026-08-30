@@ -1,0 +1,64 @@
+/* -- design tokens ---------------------------------------------
+   A monochrome terminal session. Color does not carry hierarchy here;
+   lightness and weight do. The only colored things on the page are the
+   rendered output and the swatches that choose its colors.          */
+:root {
+  --bg: #08090a;
+  --panel: #0b0d0c;
+  --panel-alt: #0c0e0d;
+  --raise: #101211;
+  --sunken: #060707;
+  --active-line: #101413;
+
+  --line: #1d211f;   /* panel border */
+  --hair: #161917;   /* divider inside a panel */
+  --edge: #232825;   /* chip and button border */
+
+  --ink: #f2f4f1;    /* brightest text */
+  --fg: #d6d9d5;
+  --mid: #8b938c;
+  --dim: #6b736d;
+  --faint: #4d554f;
+  --ghost: #363c39;
+  --keyword: #7f8a83;
+
+  --solid: #e8ebe7;  /* inverted block: emphasis comes from inversion, not hue */
+  --on-solid: #08090a;
+
+  /* rendered output only */
+  --ok: #3fb950;
+  --err: #f85149;
+  --warn: #d29922;
+
+  --row: 25px;       /* tape line height, shared by gutter and highlight layer */
+  --tape-size: 12.5px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono), var(--font-ko), ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.02em;
+}
+
+a { color: var(--mid); text-decoration: none; }
+a:hover { color: var(--ink); }
+
+button { font: inherit; letter-spacing: inherit; color: inherit; cursor: pointer; }
+
+:focus-visible { outline: 1px solid var(--solid); outline-offset: 1px; }
+
+::selection { background: var(--solid); color: var(--on-solid); }
+
+/* Thin scrollbars, like a terminal window */
+* { scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--edge); }
+*::-webkit-scrollbar-track { background: transparent; }

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="279" height="160" viewBox="0 0 279 160" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,'DejaVu Sans Mono',monospace" font-size="14">
+<style>
+svg{--bg:#0d0d0d;--bar:#141414;--bd:#262626;--dot:#303030;--ti:#5c5c5c;--fg:#e5e5e5;--dim:#737373;--ok:#3fb950;--err:#f85149;--warn:#d29922}
+.fg{fill:var(--fg)}.dim{fill:var(--dim)}.cur{fill:var(--fg)}
+.ok{fill:var(--ok)}.err{fill:var(--err)}.warn{fill:var(--warn)}
+.blink{animation:blink 1.06s step-end infinite}
+@keyframes blink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+.p0{animation:p0 3.58s infinite}.t0_0{animation:t0_0 3.58s infinite}.t0_1{animation:t0_1 3.58s infinite}.t0_2{animation:t0_2 3.58s infinite}.t0_4{animation:t0_4 3.58s infinite}.t0_5{animation:t0_5 3.58s infinite}.t0_6{animation:t0_6 3.58s infinite}.t0_7{animation:t0_7 3.58s infinite}.t0_8{animation:t0_8 3.58s infinite}.t0_9{animation:t0_9 3.58s infinite}.t0_10{animation:t0_10 3.58s infinite}.t0_11{animation:t0_11 3.58s infinite}.t0_13{animation:t0_13 3.58s infinite}.t0_14{animation:t0_14 3.58s infinite}.t0_15{animation:t0_15 3.58s infinite}.t0_16{animation:t0_16 3.58s infinite}.t0_17{animation:t0_17 3.58s infinite}.t0_18{animation:t0_18 3.58s infinite}.t0_19{animation:t0_19 3.58s infinite}.t0_20{animation:t0_20 3.58s infinite}.t0_21{animation:t0_21 3.58s infinite}.c0{animation:c0 3.58s infinite}.o1{animation:o1 3.58s infinite}.o2{animation:o2 3.58s infinite}.p3{animation:p3 3.58s infinite}.c3{animation:c3 3.58s infinite}
+@keyframes p0{0%{opacity:0;animation-timing-function:step-end}0.0001%{opacity:1}100%{opacity:1}}
+@keyframes t0_0{0%{opacity:0;animation-timing-function:step-end}0.0001%{opacity:1}100%{opacity:1}}
+@keyframes t0_1{0%{opacity:0;animation-timing-function:step-end}1.5363%{opacity:1}100%{opacity:1}}
+@keyframes t0_2{0%{opacity:0;animation-timing-function:step-end}3.0726%{opacity:1}100%{opacity:1}}
+@keyframes t0_4{0%{opacity:0;animation-timing-function:step-end}6.1453%{opacity:1}100%{opacity:1}}
+@keyframes t0_5{0%{opacity:0;animation-timing-function:step-end}7.6816%{opacity:1}100%{opacity:1}}
+@keyframes t0_6{0%{opacity:0;animation-timing-function:step-end}9.2179%{opacity:1}100%{opacity:1}}
+@keyframes t0_7{0%{opacity:0;animation-timing-function:step-end}10.7542%{opacity:1}100%{opacity:1}}
+@keyframes t0_8{0%{opacity:0;animation-timing-function:step-end}12.2905%{opacity:1}100%{opacity:1}}
+@keyframes t0_9{0%{opacity:0;animation-timing-function:step-end}13.8268%{opacity:1}100%{opacity:1}}
+@keyframes t0_10{0%{opacity:0;animation-timing-function:step-end}15.3631%{opacity:1}100%{opacity:1}}
+@keyframes t0_11{0%{opacity:0;animation-timing-function:step-end}16.8994%{opacity:1}100%{opacity:1}}
+@keyframes t0_13{0%{opacity:0;animation-timing-function:step-end}19.9721%{opacity:1}100%{opacity:1}}
+@keyframes t0_14{0%{opacity:0;animation-timing-function:step-end}21.5084%{opacity:1}100%{opacity:1}}
+@keyframes t0_15{0%{opacity:0;animation-timing-function:step-end}23.0447%{opacity:1}100%{opacity:1}}
+@keyframes t0_16{0%{opacity:0;animation-timing-function:step-end}24.5810%{opacity:1}100%{opacity:1}}
+@keyframes t0_17{0%{opacity:0;animation-timing-function:step-end}26.1173%{opacity:1}100%{opacity:1}}
+@keyframes t0_18{0%{opacity:0;animation-timing-function:step-end}27.6536%{opacity:1}100%{opacity:1}}
+@keyframes t0_19{0%{opacity:0;animation-timing-function:step-end}29.1899%{opacity:1}100%{opacity:1}}
+@keyframes t0_20{0%{opacity:0;animation-timing-function:step-end}30.7263%{opacity:1}100%{opacity:1}}
+@keyframes t0_21{0%{opacity:0;animation-timing-function:step-end}32.2626%{opacity:1}100%{opacity:1}}
+@keyframes c0{0%{opacity:0;transform:translateX(0);animation-timing-function:step-end}0.0001%{opacity:1;transform:translateX(0.0px);animation-timing-function:step-end}1.5363%{opacity:1;transform:translateX(8.4px);animation-timing-function:step-end}3.0726%{opacity:1;transform:translateX(16.8px);animation-timing-function:step-end}4.6089%{opacity:1;transform:translateX(25.2px);animation-timing-function:step-end}6.1453%{opacity:1;transform:translateX(33.6px);animation-timing-function:step-end}7.6816%{opacity:1;transform:translateX(42.0px);animation-timing-function:step-end}9.2179%{opacity:1;transform:translateX(50.4px);animation-timing-function:step-end}10.7542%{opacity:1;transform:translateX(58.8px);animation-timing-function:step-end}12.2905%{opacity:1;transform:translateX(67.2px);animation-timing-function:step-end}13.8268%{opacity:1;transform:translateX(75.6px);animation-timing-function:step-end}15.3631%{opacity:1;transform:translateX(84.0px);animation-timing-function:step-end}16.8994%{opacity:1;transform:translateX(92.4px);animation-timing-function:step-end}18.4358%{opacity:1;transform:translateX(100.8px);animation-timing-function:step-end}19.9721%{opacity:1;transform:translateX(109.2px);animation-timing-function:step-end}21.5084%{opacity:1;transform:translateX(117.6px);animation-timing-function:step-end}23.0447%{opacity:1;transform:translateX(126.0px);animation-timing-function:step-end}24.5810%{opacity:1;transform:translateX(134.4px);animation-timing-function:step-end}26.1173%{opacity:1;transform:translateX(142.8px);animation-timing-function:step-end}27.6536%{opacity:1;transform:translateX(151.2px);animation-timing-function:step-end}29.1899%{opacity:1;transform:translateX(159.6px);animation-timing-function:step-end}30.7263%{opacity:1;transform:translateX(168.0px);animation-timing-function:step-end}32.2626%{opacity:1;transform:translateX(176.4px);animation-timing-function:step-end}33.7989%{opacity:1;transform:translateX(184.8px);animation-timing-function:step-end}46.3687%{opacity:0;transform:translateX(184.8px)}100%{opacity:0;transform:translateX(184.8px)}}
+@keyframes o1{0%{opacity:0;animation-timing-function:step-end}46.3687%{opacity:1}100%{opacity:1}}
+@keyframes o2{0%{opacity:0;animation-timing-function:step-end}48.0447%{opacity:1}100%{opacity:1}}
+@keyframes p3{0%{opacity:0;animation-timing-function:step-end}49.7207%{opacity:1}100%{opacity:1}}
+@keyframes c3{0%{opacity:0;transform:translateX(0);animation-timing-function:step-end}49.7207%{opacity:1;transform:translateX(0.0px);animation-timing-function:step-end}100%{opacity:1;transform:translateX(0.0px)}}
+</style>
+<rect x=".5" y=".5" width="278" height="159" rx="9" fill="var(--bg)" stroke="var(--bd)"/>
+<path d="M.5 9.5A9 9 0 0 1 9.5.5h260a9 9 0 0 1 9 9V36H.5Z" fill="var(--bar)"/><line x1="0" y1="36" x2="279" y2="36" stroke="var(--bd)"/><circle cx="20" cy="18" r="5.0" fill="var(--dot)"/><circle cx="37" cy="18" r="5.0" fill="var(--dot)"/><circle cx="54" cy="18" r="5.0" fill="var(--dot)"/><text x="139.5" y="22.2" text-anchor="middle" fill="var(--ti)" font-size="11.5">termcast</text>
+<text class="dim p0" x="22.0" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">❯</text>
+<text class="fg t0_0" x="38.8" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">n</text>
+<text class="fg t0_1" x="47.2" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">p</text>
+<text class="fg t0_2" x="55.6" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">x</text>
+<text class="fg t0_4" x="72.4" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">t</text>
+<text class="fg t0_5" x="80.8" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">e</text>
+<text class="fg t0_6" x="89.2" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">r</text>
+<text class="fg t0_7" x="97.6" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">m</text>
+<text class="fg t0_8" x="106.0" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">c</text>
+<text class="fg t0_9" x="114.4" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">a</text>
+<text class="fg t0_10" x="122.8" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">s</text>
+<text class="fg t0_11" x="131.2" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">t</text>
+<text class="fg t0_13" x="148.0" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">t</text>
+<text class="fg t0_14" x="156.4" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">a</text>
+<text class="fg t0_15" x="164.8" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">p</text>
+<text class="fg t0_16" x="173.2" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">e</text>
+<text class="fg t0_17" x="181.6" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">.</text>
+<text class="fg t0_18" x="190.0" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">t</text>
+<text class="fg t0_19" x="198.4" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">a</text>
+<text class="fg t0_20" x="206.8" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">p</text>
+<text class="fg t0_21" x="215.2" y="69" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">e</text>
+<g class="c0"><rect class="cur blink" x="38.8" y="55" width="8.4" height="18" rx="1"/></g>
+<text class="ok o1" x="22.0" y="91" xml:space="preserve" textLength="218.4" lengthAdjust="spacing">✓ rendered 7 lines in 0.1s</text>
+<text class="dim o2" x="22.0" y="113" xml:space="preserve" textLength="151.2" lengthAdjust="spacing">→ demo.svg  9.4 kB</text>
+<text class="dim p3" x="22.0" y="135" xml:space="preserve" textLength="8.4" lengthAdjust="spacing">❯</text>
+<g class="c3"><rect class="cur blink" x="38.8" y="121" width="8.4" height="18" rx="1"/></g>
+</svg>
