@@ -15,7 +15,7 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-// The Korean subset is heavy, so it is not preloaded — latin paints first.
+// The Korean subset is heavy, so it is not preloaded; latin paints first.
 const koMono = Nanum_Gothic_Coding({
   subsets: ['latin'],
   weight: ['400', '700'],

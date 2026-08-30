@@ -1,4 +1,4 @@
-// Carry the tape inside the URL so a link is self-contained — no store, no database.
+// Carry the tape inside the URL so a link is self-contained: no store, no database.
 // deflate-raw, then base64url. Standard APIs, so the browser and the server share this.
 
 const toB64Url = (bytes: Uint8Array) => {

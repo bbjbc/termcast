@@ -11,6 +11,7 @@ GIF 3 MB가 6 KB가 되고, 확대해도 선명하고, 라이트·다크를 따�
 [![한국어](https://img.shields.io/badge/lang-%ED%95%9C%EA%B5%AD%EC%96%B4-e8ebe7?style=flat-square&labelColor=0d0d0d)](README.ko.md)
 [![License](https://img.shields.io/badge/license-MIT-6b736d?style=flat-square&labelColor=0d0d0d)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-6b736d?style=flat-square&labelColor=0d0d0d)](https://nextjs.org)
+[![Live](https://img.shields.io/badge/live-termcast--one.vercel.app-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast-one.vercel.app)
 
 <img src="docs/demo.svg" width="460" alt="termcast 데모">
 
@@ -32,10 +33,10 @@ CLI 프로젝트는 보통 데모를 GIF로 보여줍니다. GIF는 무겁고, 2
 
 ## 빠른 시작
 
-에디터를 열고, 프리셋을 고르고, 대본을 고친 뒤 나온 마크다운을 복사하면 됩니다.
+[termcast](https://termcast-one.vercel.app)를 열고, 프리셋을 고르고, 대본을 고친 뒤 나온 마크다운을 복사하면 됩니다.
 
 ```html
-<img src="https://<배포주소>/t/<code>.svg" width="430" alt="demo">
+<img src="https://termcast-one.vercel.app/t/<code>.svg" width="430" alt="demo">
 ```
 
 또는 **SVG 다운로드**로 받아 레포에 커밋하세요. 그러면 이 서비스와 무관하게 동작합니다.
@@ -82,7 +83,7 @@ type
 
 | 지시어 | 기본값 | 하는 일 |
 | --- | --- | --- |
-| `title` | — | 창 제목, 비우면 표시하지 않음 |
+| `title` | 없음 | 창 제목, 비우면 표시하지 않음 |
 | `prompt` | `$` | 프롬프트 문자열 |
 | `speed` | `55ms` | 글자당 타이핑 간격 |
 | `hold` | `1.5s` | 마지막 줄 뒤 멈춤 |
@@ -93,11 +94,11 @@ type
 | `rows` | `0` | 최소 세로 높이(줄 수), 0이면 내용에 맞춤 |
 | `radius` | `9` | 모서리 반경(px) |
 | `loop` | `on` | `on` · `off` |
-| `color <키> <색>` | — | `bg bar bd dot ti fg dim ok err warn` |
+| `color <키> <색>` | 없음 | `bg bar bd dot ti fg dim ok err warn` |
 
 알아두면 좋은 것 몇 가지:
 
-- **프롬프트는 타이핑되지 않습니다.** 줄이 시작될 때 이미 거기 있습니다 — 실제 터미널이 그렇듯이.
+- **프롬프트는 타이핑되지 않습니다.** 줄이 시작될 때 이미 거기 있습니다. 실제 터미널이 그렇듯이.
 - **`speed`와 `prompt`는 대본 중간에 다시 쓰면** 그 지점부터 적용됩니다. 설치는 느긋하게,
   빌드 로그는 빠르게 흘릴 수 있습니다.
 - **`cols`와 `rows`는 터미널을 재는 방식 그대로** 글자 수와 줄 수로 창 크기를 정합니다.
@@ -138,10 +139,10 @@ Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
 ## 구조
 
 ```
-src/app/            라우트 — 에디터 페이지와 /t/[code]
+src/app/            라우트: 에디터 페이지와 /t/[code]
 src/components/     ui/ 프리미티브, 그 위에 tape · output · workbench
 src/hooks/          대본 상태, URL 인코딩, 클립보드
-src/lib/            파서, 렌더러, 하이라이터, 인코더 — 전부 순수 함수
+src/lib/            파서, 렌더러, 하이라이터, 인코더. 전부 순수 함수
 ```
 
 `src/lib`에는 React도 DOM도 없습니다. 그래서 브라우저 미리보기와 서버 라우트가 같은 코드를

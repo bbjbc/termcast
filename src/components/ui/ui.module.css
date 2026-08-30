@@ -92,7 +92,7 @@
 .range::-webkit-slider-runnable-track { height: 3px; background: var(--line); }
 .range::-moz-range-track { height: 3px; background: var(--line); }
 
-/* A vertical bar, not a round dot — it should read as a cursor */
+/* A vertical bar, not a round dot, so it reads as a cursor */
 .range::-webkit-slider-thumb {
   appearance: none;
   width: 3px;

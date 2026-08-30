@@ -11,6 +11,7 @@ A 3 MB GIF becomes 6 KB, stays sharp at any zoom, and follows light and dark.
 [![한국어](https://img.shields.io/badge/lang-%ED%95%9C%EA%B5%AD%EC%96%B4-6b736d?style=flat-square&labelColor=0d0d0d)](README.ko.md)
 [![License](https://img.shields.io/badge/license-MIT-6b736d?style=flat-square&labelColor=0d0d0d)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-6b736d?style=flat-square&labelColor=0d0d0d)](https://nextjs.org)
+[![Live](https://img.shields.io/badge/live-termcast--one.vercel.app-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast-one.vercel.app)
 
 <img src="docs/demo.svg" width="460" alt="termcast demo">
 
@@ -19,7 +20,7 @@ A 3 MB GIF becomes 6 KB, stays sharp at any zoom, and follows light and dark.
 ## Why
 
 CLI projects usually show their demo as a GIF. GIFs are heavy, capped at 256 colors so the
-text goes mushy, and the background is baked in — a demo that looks right on a dark README
+text goes mushy, and the background is baked in, so a demo that looks right on a dark README
 looks wrong on a light one.
 
 | | GIF | termcast |
@@ -34,13 +35,13 @@ not selectable.
 
 ## Quick start
 
-Open the editor, pick a preset, edit the tape, and copy the markdown it gives you.
+Open [termcast](https://termcast-one.vercel.app), pick a preset, edit the tape, and copy the markdown it gives you.
 
 ```html
-<img src="https://<your-deployment>/t/<code>.svg" width="430" alt="demo">
+<img src="https://termcast-one.vercel.app/t/<code>.svg" width="430" alt="demo">
 ```
 
-Or use **Download SVG** and commit the file — then it works with no service behind it.
+Or use **Download SVG** and commit the file, which works with no service behind it.
 
 ```bash
 git clone https://github.com/bbjbc/termcast
@@ -84,7 +85,7 @@ type
 
 | Directive | Default | Does |
 | --- | --- | --- |
-| `title` | — | window title, hidden when empty |
+| `title` | none | window title, hidden when empty |
 | `prompt` | `$` | prompt string |
 | `speed` | `55ms` | per-character typing interval |
 | `hold` | `1.5s` | pause after the last line |
@@ -95,14 +96,14 @@ type
 | `rows` | `0` | minimum height in lines, 0 fits the content |
 | `radius` | `9` | corner radius in px |
 | `loop` | `on` | `on` · `off` |
-| `color <key> <hex>` | — | `bg bar bd dot ti fg dim ok err warn` |
+| `color <key> <hex>` | none | `bg bar bd dot ti fg dim ok err warn` |
 
 A few things worth knowing:
 
 - **The prompt is not typed.** It is there when the line starts, the way a real terminal behaves.
 - **`speed` and `prompt` can appear again mid-tape** and apply from that point on, so an
   install can crawl while a build log flies past.
-- **`cols` and `rows` size the window the way a terminal is sized** — in characters and lines.
+- **`cols` and `rows` size the window the way a terminal is sized,** in characters and lines.
   `cols 80` and `rows 24` gives you the classic one. `rows` is a floor, not a ceiling: a static
   SVG cannot scroll, so longer output grows the window rather than losing lines.
 - **Quote to keep leading spaces:** `out "    nested.txt"`
@@ -130,22 +131,22 @@ Fonts are the other consequence of that header: no external font loads, so web f
 inside the SVG are ignored and the renderer falls back to a system monospace.
 
 **Links need no database.** The tape is deflated and base64url-encoded into the path, so
-`/t/<code>.svg` renders it on the spot. Same input, same output — the response is cached as
+`/t/<code>.svg` renders it on the spot. Same input, same output, so the response is cached as
 immutable. Long tapes exceed what a URL can hold; the editor notices and points you at the
 download instead.
 
 **Nothing is recorded.** You are not capturing a session, you are writing one. No typos, no
-awkward waits, no re-running a command to get a clean take — and you can demo a flag you have
+awkward waits, no re-running a command to get a clean take, and you can demo a flag you have
 not built yet. The cost is honesty: a tape can claim any output it likes. If a number in a
 demo matters, it is on you to make it a real one.
 
 ## Project layout
 
 ```
-src/app/            routes — the editor page and /t/[code]
+src/app/            routes: the editor page and /t/[code]
 src/components/     ui/ primitives, then tape · output · workbench
 src/hooks/          tape state, URL encoding, clipboard
-src/lib/            parser, renderer, highlighter, encoder — all pure
+src/lib/            parser, renderer, highlighter, encoder, all pure
 ```
 
 `src/lib` has no React and no DOM, which is why the browser preview and the server route can
@@ -155,7 +156,7 @@ The tape string is the only state. The settings panel does not hold values of it
 writes directives into the tape. So the form and the text cannot disagree, and putting the
 tape in a URL carries everything.
 
-Next.js and React are the only runtime dependencies — compression uses `CompressionStream`,
+Next.js and React are the only runtime dependencies. Compression uses `CompressionStream`,
 so there is no compression library.
 
 ```bash

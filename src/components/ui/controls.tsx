@@ -51,7 +51,7 @@ type SliderProps = {
   max: number;
   step?: number;
   label: string;
-  /** Render the value for humans — this is where cases like 0 meaning "auto" belong. */
+  /** Render the value for humans. Cases like 0 meaning "auto" belong here. */
   format: (value: number) => string;
   onChange: (value: number) => void;
 };

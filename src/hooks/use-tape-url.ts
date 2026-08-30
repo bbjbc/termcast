@@ -7,8 +7,8 @@ import { MAX_CODE, encodeTape } from '@/lib/encode';
 const subscribe = () => () => {};
 
 /**
- * Compress the tape into an address. A link is then self-contained — no store,
- * no database — at the cost of a ceiling: past it we point people at the file.
+ * Compress the tape into an address. A link is then self-contained, with no store
+ * and no database, at the cost of a ceiling: past it we point people at the file.
  */
 export function useTapeUrl(source: string) {
   const [code, setCode] = useState('');

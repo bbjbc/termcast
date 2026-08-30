@@ -7,10 +7,10 @@ export type TokenKind = 'content' | 'config' | 'value' | 'comment' | 'plain';
 
 export type Token = { text: string; kind: TokenKind };
 
-/** Commands that build the timeline — the body of the tape, so the brightest. */
+/** Commands that build the timeline: the body of the tape, so the brightest. */
 const CONTENT = new Set(['type', 'out', 'dim', 'ok', 'err', 'warn', 'wait']);
 
-/** Commands that configure the window — these recede. */
+/** Commands that configure the window. These recede. */
 const CONFIG = new Set([
   'title', 'prompt', 'speed', 'hold', 'theme',
   'font', 'cols', 'rows', 'chrome', 'loop', 'radius', 'color',

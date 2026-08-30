@@ -27,7 +27,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
   return new Response(svg, {
     headers: {
       'content-type': 'image/svg+xml; charset=utf-8',
-      // Same input, same output — safe to cache forever
+      // Same input, same output, so this is safe to cache forever
       'cache-control': 'public, max-age=31536000, immutable',
     },
   });

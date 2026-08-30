@@ -4,5 +4,5 @@ node_modules
 *.tsbuildinfo
 next-env.d.ts
 
-# Seeded design-canvas payload — a build artifact, regenerated from design/*.dc.html
+# Seeded design-canvas payload: a build artifact, regenerated from design/*.dc.html
 design/termcast-site-directions.html

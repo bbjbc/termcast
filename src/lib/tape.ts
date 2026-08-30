@@ -59,7 +59,7 @@ export const COLORS = COLOR_KEYS;
 /** "400" | "400ms" | "1.5s" -> ms */
 export function parseMs(value: string): number {
   const m = value.trim().match(/^([\d.]+)\s*(ms|s)?$/);
-  if (!m) throw new Error(`invalid duration "${value}" — use 400ms or 1.5s`);
+  if (!m) throw new Error(`invalid duration "${value}", use 400ms or 1.5s`);
   return Math.round(parseFloat(m[1]) * (m[2] === 's' ? 1000 : 1));
 }
 

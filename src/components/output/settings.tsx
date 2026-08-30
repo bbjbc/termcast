@@ -36,7 +36,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 export function Settings({ cfg, onPatch }: { cfg: Config; onPatch: Patch }) {
   const { t } = useI18n();
-  // With auto, show the light defaults — the picker has to commit to one of them
+  // With auto, show the light defaults; the picker has to commit to one of them
   const base = cfg.theme === 'auto' ? 'light' : cfg.theme;
 
   return (

@@ -37,7 +37,7 @@ export type Dict = {
 
 const en: Dict = {
   meta: {
-    title: 'termcast — terminal demos as animated SVG',
+    title: 'termcast: terminal demos as animated SVG',
     description: 'Write a tape, get a terminal demo for your README. A 3 MB GIF becomes 6 KB.',
   },
   tagline: { lead: 'Terminal demos as animated SVG.', strong: 'A 3 MB GIF becomes 6 KB.' },
@@ -75,7 +75,7 @@ const en: Dict = {
 
 const ko: Dict = {
   meta: {
-    title: 'termcast — 터미널 데모를 애니메이션 SVG로',
+    title: 'termcast: 터미널 데모를 애니메이션 SVG로',
     description: '대본을 쓰면 README에 넣을 터미널 데모가 나옵니다. GIF 3MB가 6KB가 됩니다.',
   },
   tagline: { lead: '터미널 데모를 애니메이션 SVG로.', strong: 'GIF 3 MB가 6 KB가 됩니다.' },

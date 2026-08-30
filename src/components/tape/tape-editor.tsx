@@ -31,7 +31,7 @@ export function TapeEditor({ value, onChange }: TapeEditorProps) {
 
   const lines = useMemo(() => highlightTape(value), [value]);
 
-  // Scroll sync goes straight through refs — no re-render on every wheel tick
+  // Scroll sync goes straight through refs, so no re-render on every wheel tick
   const syncScroll = useCallback((event: UIEvent<HTMLTextAreaElement>) => {
     const { scrollTop, scrollLeft } = event.currentTarget;
     if (layerRef.current) {
