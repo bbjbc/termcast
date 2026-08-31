@@ -73,6 +73,29 @@ fixed multiple of its width. A media query inside the SVG cannot change it eithe
 is settled before the SVG's own CSS runs. Setting `svg{height:...}` from a media query was
 ignored in all three engines.
 
+**`100vw` is the render box too**, the same length the media queries match against, and it
+works inside `calc()`. `round(down, calc(100vw - 44px), 8.4px)` computed the wrap width of
+the reflowing embed correctly in all three engines, as did geometry properties fed from it:
+`width` on a `clipPath` rect and `transform` on a group, both through `var()`.
+
+**CSS `round()` divides without the slack `wrapText` has.** A 254px box leaves 210px of
+usable width, `210 / 8.4` comes out at `24.999...` in doubles, and `round(down, ...)`
+returned 24 columns where the renderer's own arithmetic says 25 (`metrics.ts` allows a
+`1e-6` overshoot for exactly this reason). All three engines agreed on the wrong answer,
+which at least made it easy to see. Adding `0.02px` to the length before rounding restored
+the column in all three; a cell is 8.4px, so the nudge cannot cross a real boundary.
+
+**Resizing the box restarts the animation.** Shrinking the window around a fluid embed
+re-renders the SVG at the new width, glyphs at their authored size, wrap following the box,
+and the CSS timeline starts over from zero. All three engines. The layout-per-width format
+behaved the same way, so this is a property of SVG-in-`<img>`, not of the reflow.
+
+**A run pinned with `textLength` drifts off the cell grid.** `lengthAdjust="spacing"`
+spreads the correction over the gaps, so a glyph can sit up to a cell's worth of spacing
+error, near 0.7px with Consolas, away from its column. No fixed layout can see it; a clip
+edge can, as a hair of the neighbouring row's glyph at the row edge. The reflowing renderer
+therefore writes an x per glyph instead of a `textLength` per run.
+
 ## What GitHub keeps, and what it sends
 
 `width="100%"`, `<picture>` and `<source media>` all survive the sanitizer. Checked by
@@ -128,16 +151,25 @@ not two hundred, so the URL ceiling stops it first:
 | a 200 line tape | 8.7 KB | 2,900 chars | fits |
 | a 300 line tape | 13.1 KB | 4,178 chars | stopped by `MAX_CODE` |
 
-## Payload with several layouts
+## Reflow instead of layouts
 
-One file carrying more than one layout is mostly repetition, so it compresses well. The
-site is served with brotli, which was confirmed against the deployed response headers.
+The layout-per-width format paid for its right margin in copies of the demo. One script,
+17 logical lines with a few long ones, font 14, columns 24 to 94, rendered by
+`renderLayers` at several spacings and by `renderFlow` once:
 
-| preset | one layout | two | three |
-| --- | --- | --- | --- |
-| install | 1.5 KB | 1.9 KB | 2.1 KB |
-| scaffold | 1.3 KB | 1.6 KB | 1.7 KB |
-| profile | 1.6 KB | 2.2 KB | 2.4 KB |
+| format | worst right gap | raw | brotli | nodes |
+| --- | --- | --- | --- | --- |
+| 3 layouts | 36 cols | 97.9 KB | 4.9 KB | 314 |
+| 11 layouts | 7 cols | 350.6 KB | 9.9 KB | 1,103 |
+| 19 layouts | 4 cols | 605.8 KB | 14.5 KB | 1,892 |
+| 36 layouts | 2 cols | 1,149.6 KB | 23.0 KB | 3,575 |
+| reflow | under 1 cell | 47.7 KB | 3.9 KB | 219 |
 
-Brotli, on the wire. Each extra layout costs roughly half a kilobyte and no extra line in
-anybody's README.
+The wire cost was never the problem; raw size and node count are what the parse and paint
+time follow, and they stop depending on how many widths are covered at all. A Korean tape
+is heavier in rules, because every wrap of a two-cell line needs explicit shifts: the same
+range came to 68.7 KB raw and 3.3 KB brotli, still a copy of the text rather than seventy.
+
+Checked in the same three engines as everything else, against the old renderer's output
+side by side at 254, 300, 406, 561, 602 and 838px: same wrap, same colors, same timing, and
+one column more used wherever the old format had rounded down to its nearest layout.

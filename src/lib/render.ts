@@ -4,7 +4,7 @@ import {
 } from './metrics';
 import { MIN_COLS, type Config, type El, type Palette, THEMES } from './tape';
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /**
  * Bumped whenever the same tape starts rendering differently.
@@ -19,7 +19,7 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
  * the point: nothing here has to keep old renderers alive, because an address that
  * was published is already frozen in the cache.
  */
-export const RENDERER_VERSION = 2;
+export const RENDERER_VERSION = 3;
 
 // Re-exported because the renderer is where callers expect to find them.
 export { cells, cellWidth } from './metrics';
@@ -45,7 +45,7 @@ export function metrics(cfg: Config) {
  * is a running sum of an em fraction, so it drifts, and a long run of one width
  * would split partway through for no reason anybody could see.
  */
-function runs(s: string, adv: Advance): { text: string; x: number; w: number; a: number }[] {
+export function runs(s: string, adv: Advance): { text: string; x: number; w: number; a: number }[] {
   const out: { text: string; x: number; w: number; a: number }[] = [];
   let x = 0;
   for (const ch of s) {
@@ -61,21 +61,13 @@ function runs(s: string, adv: Advance): { text: string; x: number; w: number; a:
   }
   return out;
 }
-export type Layer = { cfg: Config; els: El[]; rows: number; total: number };
-
-/**
- * One layout: its text, its cursor, and the keyframes that drive both.
- *
- * `prefix` namespaces every animation, because a responsive SVG carries several
- * of these at once and they would otherwise all answer to `t0_0`.
- */
-function layer(cfg: Config, els: El[], rows: number, total: number, prefix: string) {
+/** One layout: its text, its cursor, and the keyframes that drive both. */
+function layer(cfg: Config, els: El[], rows: number, total: number) {
   const { fs, cw, wide, lh, padx, pady, bar } = metrics(cfg);
   const adv = advanceOf(cw, wide);
   const pct = (t: number) => Math.max(0.0001, Math.min(100, (t / total) * 100)).toFixed(4);
   const dur = (total / 1000).toFixed(2);
   const iter = cfg.loop ? 'infinite' : '1 both';
-  const nm = (s: string) => `${prefix}${s}`;
 
   const promptGap = (prompt: string) => (prompt ? textWidth(prompt, adv) + cw : 0);
 
@@ -114,16 +106,16 @@ function layer(cfg: Config, els: El[], rows: number, total: number, prefix: stri
 
     if (e.kind === 'out') {
       if (!e.text.length) return;                       // blank lines only take space
-      appear(nm(`o${i}`), e.t0);
-      const cls = `${e.tone === 'out' ? 'fg' : e.tone} ${nm(`o${i}`)}`;
+      appear(`o${i}`, e.t0);
+      const cls = `${e.tone === 'out' ? 'fg' : e.tone} o${i}`;
       for (const r of runs(e.text, adv)) nodes.push(piece(cls, r.x, y, r.text, r.w));
       return;
     }
 
     const off = promptGap(e.prompt);
     if (e.prompt) {                                     // the prompt is already there; only the command types in
-      appear(nm(`p${i}`), e.t0);
-      nodes.push(piece(`dim ${nm(`p${i}`)}`, 0, y, e.prompt, textWidth(e.prompt, adv)));
+      appear(`p${i}`, e.t0);
+      nodes.push(piece(`dim p${i}`, 0, y, e.prompt, textWidth(e.prompt, adv)));
     }
 
     // Characters appear one by one at cumulative offsets, so mixed widths stay aligned.
@@ -132,8 +124,8 @@ function layer(cfg: Config, els: El[], rows: number, total: number, prefix: stri
     chars.forEach((ch, j) => {
       const w = adv(ch);
       if (ch !== ' ') {
-        appear(nm(`t${i}_${j}`), e.t0 + j * e.speed);
-        nodes.push(piece(`fg ${nm(`t${i}_${j}`)}`, off + stops[j], y, ch, w));
+        appear(`t${i}_${j}`, e.t0 + j * e.speed);
+        nodes.push(piece(`fg t${i}_${j}`, off + stops[j], y, ch, w));
       }
       stops.push(stops[j] + w);
     });
@@ -144,9 +136,9 @@ function layer(cfg: Config, els: El[], rows: number, total: number, prefix: stri
     const tEnd = i === lastType ? total : els[i + 1].t0;
     const end = stops[chars.length].toFixed(1);
     const stay = tEnd >= total;
-    names.push(nm(`c${i}`));
+    names.push(`c${i}`);
     kf.push(
-      `@keyframes ${nm(`c${i}`)}{`
+      `@keyframes c${i}{`
       + `0%{opacity:0;transform:translateX(0);animation-timing-function:step-end}`
       + stops.map((s, j) =>
           `${pct(e.t0 + j * e.speed)}%{opacity:1;transform:translateX(${s.toFixed(1)}px);animation-timing-function:step-end}`
@@ -154,7 +146,7 @@ function layer(cfg: Config, els: El[], rows: number, total: number, prefix: stri
       + (stay ? '' : `${pct(tEnd)}%{opacity:0;transform:translateX(${end}px)}`)
       + `100%{opacity:${stay ? 1 : 0};transform:translateX(${end}px)}}`
     );
-    nodes.push(`<g class="${nm(`c${i}`)}"><rect class="cur blink" x="${(padx + off).toFixed(1)}"`
+    nodes.push(`<g class="c${i}"><rect class="cur blink" x="${(padx + off).toFixed(1)}"`
       + ` y="${top + e.row * lh + Math.round(fs * 0.1)}" width="${cw.toFixed(1)}"`
       + ` height="${Math.round(fs * 1.3)}" rx="1"/></g>`);
   });
@@ -163,21 +155,18 @@ function layer(cfg: Config, els: El[], rows: number, total: number, prefix: stri
     W,
     H,
     nodes: nodes.join('\n'),
-    // Kept apart because a responsive SVG puts them in different places: the
-    // hooks go inside the layout's own media query, the keyframes outside it.
-    anim: names.map(n => `.${n}{animation:${n} ${dur}s ${iter}}`).join(''),
-    kf: kf.join('\n'),
+    css: `${names.map(n => `.${n}{animation:${n} ${dur}s ${iter}}`).join('')}\n${kf.join('\n')}`,
   };
 }
 
 /**
- * The window around one or more layouts.
+ * The window around a layout, shared with the reflowing embed in `flow.ts`.
  *
- * `W` is the narrowest layout's width. Fixed output is drawn to it exactly;
- * fluid output treats it as a floor and stretches past it, which is why the
- * title is trimmed against it rather than against whatever box turns up.
+ * `W` is the floor width. Fixed output is drawn to it exactly; fluid output
+ * treats it as a floor and stretches past it, which is why the title is
+ * trimmed against it rather than against whatever box turns up.
  */
-function frame(cfg: Config, W: number, H: number, fluid: boolean, css: string, body: string): string {
+export function frame(cfg: Config, W: number, H: number, fluid: boolean, css: string, body: string): string {
   const { fs, padx, bar } = metrics(cfg);
 
   const pal = (base: Palette) => Object.entries({ ...base, ...cfg.colors })
@@ -273,47 +262,6 @@ ${body}${edge}
  * @see docs/notes/measurements.md, "SVG in an `<img>`"
  */
 export function render(cfg: Config, els: El[], rows: number, total: number, fluid = false): string {
-  const l = layer(cfg, els, rows, total, '');
-  return frame(cfg, l.W, l.H, fluid, `${l.anim}\n${l.kf}`, l.nodes);
-}
-
-/**
- * Several layouts in one image, with CSS picking the widest that fits.
- *
- * Layers arrive narrowest first. Each takes over at its own width, so a layout
- * is never shown in a box too small for it, and the narrowest also covers
- * everything below it because there is nothing better to fall back to.
- *
- * The height cannot follow: an `<img>` fixes its box before the SVG's own CSS
- * runs, so every layout shares the tallest one's height and the wider ones leave
- * empty rows below the prompt.
- *
- * @see docs/notes/decisions.md, "The embed carries its layouts in one file"
- */
-export function renderLayers(layers: Layer[]): string {
-  const built = layers.map((l, i) => layer(l.cfg, l.els, l.rows, l.total, `L${i}_`));
-
-  const H = Math.max(...built.map((b) => b.H));
-
-  // The animation hooks sit inside the media query, next to the display rule.
-  // Firefox and WebKit drop animations on a display:none element the way the
-  // spec says; Chromium keeps every one of them running, so a file holding
-  // thirty layouts would animate thirty times what it shows. Declaring the
-  // hooks only inside the query that reveals a layout leaves the hidden ones
-  // with no animation to keep.
-  const css = built.map((b, i) => {
-    const lo = i === 0 ? 0 : b.W;
-    const q = i === built.length - 1
-      ? `@media (min-width:${lo}px)`
-      : `@media (min-width:${lo}px) and (max-width:${built[i + 1].W - 1}px)`;
-    // The blink is declared once for the whole document, so it has to be turned
-    // off per layout and back on inside the query, or Chromium goes on blinking
-    // a cursor in every layout it is not showing.
-    const blink = '{animation:blink 1.06s step-end infinite}';
-    return `.L${i}{display:none}\n.L${i} .blink{animation:none}\n`
-      + `${q}{.L${i}{display:inline}\n.L${i} .blink${blink}\n${b.anim}}\n${b.kf}`;
-  }).join('\n');
-
-  const body = built.map((b, i) => `<g class="L${i}">\n${b.nodes}\n</g>`).join('\n');
-  return frame(layers[0].cfg, built[0].W, H, true, css, body);
+  const l = layer(cfg, els, rows, total);
+  return frame(cfg, l.W, l.H, fluid, l.css, l.nodes);
 }

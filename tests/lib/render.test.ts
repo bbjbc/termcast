@@ -316,38 +316,7 @@ describe('render: a fluid window', () => {
     expect(fluid('title hi\n\nout x\n', 60)).toContain('<text x="50%"');
   });
 
-  it('carries several layouts in one image, widest wins where it fits', () => {
-    const tape = 'out the quick brown fox jumps over the lazy dog\n';
-    const svg = tapeToSvg(tape, { cols: [24, 60] }).svg;
-    expect(svg).toContain('.L0{display:none}');
-    expect(svg).toContain('.L1{display:none}');
-    // L0 holds everything below the width L1 needs, then hands over exactly there.
-    const [, hi] = /max-width:(\d+)px\)\{\.L0/.exec(svg)!;
-    const [, lo] = /min-width:(\d+)px\)\{\.L1/.exec(svg)!;
-    expect(Number(lo)).toBe(Number(hi) + 1);
-  });
-
-  it('gives every layout its own animation names, so they cannot collide', () => {
-    const svg = tapeToSvg('out hi\n', { cols: [24, 60] }).svg;
-    expect(svg).toContain('@keyframes L0_o0');
-    expect(svg).toContain('@keyframes L1_o0');
-  });
-
-  it('takes the tallest layout as the height, since an img cannot resize itself', () => {
-    const tape = 'out the quick brown fox jumps over the lazy dog\n';
-    const narrow = heightOf(tapeToSvg(tape, { cols: 24 }).svg);
-    expect(heightOf(tapeToSvg(tape, { cols: [24, 60] }).svg)).toBe(narrow);
-  });
-
-  it('treats a repeated width as the one layout it is', () => {
-    expect(tapeToSvg('out hi\n', { cols: [40, 40] }).svg)
-      .toBe(tapeToSvg('out hi\n', { cols: 40 }).svg);
-  });
-
-  it('sorts layouts narrowest first however they arrive', () => {
-    expect(tapeToSvg('out hi\n', { cols: [60, 24] }).svg)
-      .toBe(tapeToSvg('out hi\n', { cols: [24, 60] }).svg);
-  });
+  // Two or more widths reflow instead: those live in tests/lib/flow.test.ts.
 
   it('keeps the offset of a title that had to clear the dots', () => {
     const svg = fluid('title a very long window title indeed\n\nout x\n', 20);

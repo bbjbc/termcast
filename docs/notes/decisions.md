@@ -37,7 +37,7 @@ reserved-name rename for Nanum, and Vercel file tracing for a 2.6 MB font.
 
 Do not restart this without a defect somebody can actually see.
 
-## The embed carries its layouts in one file
+## The embed reflows by clipping one strip
 
 A README column is near 250px on a phone and near 840px on a desktop. One image has to
 answer both.
@@ -54,26 +54,33 @@ while the SVG fills the column, which are not the same number: at a 768px viewpo
 sidebar takes the column down to 406px, and a table of breakpoints tuned by hand got that
 case wrong and cut text off.
 
-What works is putting every layout in the one file and letting the SVG choose, because a
-media query inside an SVG is matched against the box the page actually gave it. The
-sidebar case then needs no special handling. It is simply another box width, and it lands
-on whichever layout fits.
+The second attempt carried one pre-wrapped layout per column count in the one file, with a
+media query inside the SVG picking the widest that fits, which works because those queries
+are matched against the box the page actually gave the image. It also multiplied the file
+by the number of layouts: holding the wasted right margin under a character took a layout
+every two columns, thirty-six copies of the demo, and the parse time grew with them. The
+numbers that killed it are in `measurements.md`, "Reflow instead of layouts".
 
-`/t/v<n>/w<a>-<b>-<c>/<code>.svg` renders those widths as layouts in one file.
-`src/lib/embed.ts` picks the widths and writes the `<img>` the editor copies.
+What ships is `src/lib/flow.ts`: the text is laid down once, unwrapped, and wrapping is
+done by a clip. A line that takes k rows is the same strip drawn k times, copy j shifted
+left by j times the wrap width, and the wrap width is computed by the SVG's own CSS from
+the box, `clamp(lo, round(down, 100vw - padding, cell), hi)`, because `100vw` in an SVG
+loaded through `<img>` is the render box. Lines break where they meet the padding at every
+width, the sidebar case needs no handling at all, and the file grows with the tape rather
+than with the widths covered. Media queries remain only for what CSS cannot compute: the
+per-line vertical offsets, which change at the column counts where some line gains or loses
+a row, and the explicit shifts of lines holding two-cell glyphs, whose break offsets do not
+ride on the wrap width. Engines without `round()` get the `@supports` fallback: the same
+body pinned to the narrow end of the range, which is exactly what a one-layout embed was.
 
-The cost is the height. Every layout shares the tallest one's, so a wide column gets empty
-rows under the prompt. A terminal with room below the cursor still reads as a terminal, and
-this is the part of the problem an `<img>` genuinely cannot solve.
+`/t/v<n>/w<lo>-<hi>/<code>.svg` names the range. Older addresses list every width they were
+wrapped for; the route reads the ends of the list as the range, so they render the same.
+`src/lib/embed.ts` writes the `<img>` the editor copies.
 
-The second cost is that nothing reflows at display time. The wrap is baked in when the tape
-is built, so a layout shown in a box narrower than it was wrapped for is cut off rather
-than shrunk. Every width has to stay at or below the narrowest column it will be shown in.
-
-Three layouts is a judgement, not a law. The first sits just under the narrowest column,
-the rest divide what is left evenly, and that holds the wasted width near twenty-four
-characters anywhere in the range. A fourth is another copy of the text in the same file,
-about half a kilobyte on the wire, and no extra line in anybody's README.
+The cost is still the height. The box is settled before the SVG's CSS runs, so it is sized
+for the narrow end of the range and a wide column gets empty rows under the prompt. A
+terminal with room below the cursor still reads as a terminal, and this is the part of the
+problem an `<img>` genuinely cannot solve.
 
 ## The tape is bounded by what it decodes to, not by what it compresses to
 

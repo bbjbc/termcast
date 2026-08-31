@@ -103,12 +103,12 @@ describe('the SVG route: a width in the address', () => {
     expect(await h(narrow)).toBeGreaterThan(await h(wide));
   });
 
-  it('takes several widths as layouts in one image', async () => {
+  it('takes a width range as one reflowing image', async () => {
     const res = await call(['v1', 'w24-60', `${await encodeTape(LONG)}.svg`]);
     const svg = await res.text();
     expect(res.status).toBe(200);
-    expect(svg).toContain('.L0{display:none}');
-    expect(svg).toContain('.L1{display:none}');
+    expect(svg).toContain('@supports (width:round');
+    expect(svg).toContain('clip-path="url(#win)"');
   });
 
   it('refuses a width past the ceiling anywhere in the list', async () => {

@@ -20,8 +20,10 @@ const WIDTH = /^w([1-9]\d*(?:-[1-9]\d*)*)$/;
  * is already frozen in the CDN, so there is nothing here to keep old versions for.
  *
  * `/t/v1/w24/<code>.svg` adds a width. It overrides the tape's own `cols` and
- * renders the window fluid. `/t/v1/w24-43/<code>.svg` asks for both widths in
- * one image, which is what keeps a README embed down to a single `<img>`.
+ * renders the window fluid. `/t/v1/w24-94/<code>.svg` gives a range: one image
+ * that reflows to any box between those columns, which is what keeps a README
+ * embed down to a single `<img>`. Older addresses list every width they were
+ * wrapped for; the ends of the list are the same range, so they render the same.
  *
  * The width belongs in the address rather than in the tape because it is a
  * property of where the SVG is being shown, not of what is being demonstrated.

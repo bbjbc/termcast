@@ -6,8 +6,10 @@ drop into a README.
 - Live: https://termcast.xyz
 - Editor pages: `/en`, `/ko`. Bare `/` redirects by `Accept-Language`.
 - SVG endpoint: `/t/v<n>/<code>.svg`, where `<code>` is the deflated tape and `<n>` is
-  `RENDERER_VERSION`. `/t/v<n>/w<a>-<b>-<c>/<code>.svg` adds the widths a responsive embed
-  is wrapped for. `/t/<code>.svg` still resolves, for addresses that predate the version.
+  `RENDERER_VERSION`. `/t/v<n>/w<lo>-<hi>/<code>.svg` adds the column range a responsive
+  embed reflows across; older addresses list every width they were wrapped for and the ends
+  of the list read as the same range. `/t/<code>.svg` still resolves, for addresses that
+  predate the version.
 
 This file is the rules: what you have to hold to while writing code here. The reasoning
 behind them is elsewhere, and it is worth reading before changing anything load bearing.
