@@ -20,29 +20,26 @@ export function cells(cp: number): 1 | 2 {
 export const cellWidth = (s: string) =>
   [...s].reduce((w, ch) => w + cells(ch.codePointAt(0)!), 0);
 
-/** Group runs of equal-width characters; an exact width per run keeps the grid. */
-function runs(s: string): { text: string; at: number; w: number }[] {
-  const out: { text: string; at: number; w: number }[] = [];
-  let at = 0;
-  for (const ch of s) {
-    const c = cells(ch.codePointAt(0)!);
-    const last = out[out.length - 1];
-    if (last && last.w / [...last.text].length === c) {
-      last.text += ch;
-      last.w += c;
-    } else {
-      out.push({ text: ch, at, w: c });
-    }
-    at += c;
-  }
-  return out;
-}
+/**
+ * Latin monospace advances land near 0.6em: IBM Plex Mono and DejaVu Sans Mono
+ * are 0.600 and 0.602, Consolas 0.550.
+ *
+ * A wide glyph is two cells, but it is not 1.2em. Every CJK font measured puts
+ * Hangul at 1.0em (Nanum Gothic Coding, Malgun Gothic) or a little under
+ * (Noto Sans KR, 0.92). Reserving 1.2em and pinning it with textLength pushed
+ * the leftover 0.2em into the gaps between glyphs, so Korean came out visibly
+ * letter-spaced. Advancing wide glyphs by their real width fixes that, and the
+ * grid stays deterministic because textLength still pins every run.
+ */
+const LATIN_EM = 0.6;
+const WIDE_EM = 1.0;
 
 export function metrics(cfg: Config) {
   const fs = cfg.font;
   return {
     fs,
-    cw: fs * 0.6,
+    cw: fs * LATIN_EM,
+    wide: fs * WIDE_EM,
     lh: Math.round(fs * 1.57),
     padx: Math.round(fs * 1.6),
     pady: Math.round(fs * 1.3),
@@ -50,17 +47,50 @@ export function metrics(cfg: Config) {
   };
 }
 
+type Advance = (ch: string) => number;
+
+/** Horizontal space one character takes, in px. */
+const advanceOf = (cw: number, wide: number): Advance =>
+  (ch) => (cells(ch.codePointAt(0)!) === 2 ? wide : cw);
+
+/** Width of a whole string, in px. */
+const textWidth = (s: string, adv: Advance) =>
+  [...s].reduce((w, ch) => w + adv(ch), 0);
+
+/** Group runs of equal-width characters. An exact width per run keeps the grid. */
+function runs(s: string, adv: Advance): { text: string; x: number; w: number }[] {
+  const out: { text: string; x: number; w: number }[] = [];
+  let x = 0;
+  for (const ch of s) {
+    const a = adv(ch);
+    const last = out[out.length - 1];
+    if (last && last.w / [...last.text].length === a) {
+      last.text += ch;
+      last.w += a;
+    } else {
+      out.push({ text: ch, x, w: a });
+    }
+    x += a;
+  }
+  return out;
+}
+
 export function render(cfg: Config, els: El[], rows: number, total: number): string {
-  const { fs, cw, lh, padx, pady, bar } = metrics(cfg);
+  const { fs, cw, wide, lh, padx, pady, bar } = metrics(cfg);
+  const adv = advanceOf(cw, wide);
   const pct = (t: number) => Math.max(0.0001, Math.min(100, (t / total) * 100)).toFixed(4);
   const dur = (total / 1000).toFixed(2);
   const iter = cfg.loop ? 'infinite' : '1 both';
 
-  const auto = els.reduce((w, e) => Math.max(
+  const promptGap = (prompt: string) => (prompt ? textWidth(prompt, adv) + cw : 0);
+
+  // Widest line in px, then expressed in columns so `cols` keeps its meaning
+  const widest = els.reduce((w, e) => Math.max(
     w,
-    (e.kind === 'type' ? (e.prompt ? cellWidth(e.prompt) + 1 : 0) : 0) + cellWidth(e.text) + 2,
-  ), 24);
-  const cols = cfg.cols || auto;
+    (e.kind === 'type' ? promptGap(e.prompt) : 0) + textWidth(e.text, adv),
+  ), 0);
+  const cols = cfg.cols || Math.ceil(widest / cw) + 2;
+
   // rows is a floor, never a ceiling: a static SVG cannot scroll, so clipping
   // content to a set height would silently lose lines.
   const height = Math.max(rows, cfg.rows);
@@ -75,10 +105,10 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
     kf.push(`@keyframes ${name}{0%{opacity:0;animation-timing-function:step-end}${pct(t0)}%{opacity:1}100%{opacity:1}}`);
   };
 
-  /** One run on the cell grid. An explicit width keeps columns aligned in any font. */
-  const piece = (cls: string, at: number, y: number, s: string, w: number) =>
-    `<text class="${cls}" x="${(padx + at * cw).toFixed(1)}" y="${y}" xml:space="preserve"`
-    + ` textLength="${(w * cw).toFixed(1)}" lengthAdjust="spacing">${esc(s)}</text>`;
+  /** One run at an exact offset and width, so columns line up in any font. */
+  const piece = (cls: string, x: number, y: number, s: string, w: number) =>
+    `<text class="${cls}" x="${(padx + x).toFixed(1)}" y="${y}" xml:space="preserve"`
+    + ` textLength="${w.toFixed(1)}" lengthAdjust="spacing">${esc(s)}</text>`;
 
   const lastType = els.reduce((acc, e, i) => (e.kind === 'type' ? i : acc), -1);
 
@@ -89,21 +119,21 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
       if (!e.text.length) return;                       // blank lines only take space
       appear(`o${i}`, e.t0);
       const cls = `${e.tone === 'out' ? 'fg' : e.tone} o${i}`;
-      for (const r of runs(e.text)) nodes.push(piece(cls, r.at, y, r.text, r.w));
+      for (const r of runs(e.text, adv)) nodes.push(piece(cls, r.x, y, r.text, r.w));
       return;
     }
 
-    const off = e.prompt ? cellWidth(e.prompt) + 1 : 0;
+    const off = promptGap(e.prompt);
     if (e.prompt) {                                     // the prompt is already there; only the command types in
       appear(`p${i}`, e.t0);
-      nodes.push(piece(`dim p${i}`, 0, y, e.prompt, cellWidth(e.prompt)));
+      nodes.push(piece(`dim p${i}`, 0, y, e.prompt, textWidth(e.prompt, adv)));
     }
 
     // Characters appear one by one at cumulative offsets, so mixed widths stay aligned.
     const chars = [...e.text];
     const stops: number[] = [0];
     chars.forEach((ch, j) => {
-      const w = cells(ch.codePointAt(0)!);
+      const w = adv(ch);
       if (ch !== ' ') {
         appear(`t${i}_${j}`, e.t0 + j * e.speed);
         nodes.push(piece(`fg t${i}_${j}`, off + stops[j], y, ch, w));
@@ -113,19 +143,19 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
 
     // Cursor: mark every landing spot, since steps() drifts once widths are mixed
     const tEnd = i === lastType ? total : (els[i + 1]?.t0 ?? total);
-    const end = (stops[chars.length] * cw).toFixed(1);
+    const end = stops[chars.length].toFixed(1);
     const stay = tEnd >= total;
     names.push(`c${i}`);
     kf.push(
       `@keyframes c${i}{`
       + `0%{opacity:0;transform:translateX(0);animation-timing-function:step-end}`
       + stops.map((s, j) =>
-          `${pct(e.t0 + j * e.speed)}%{opacity:1;transform:translateX(${(s * cw).toFixed(1)}px);animation-timing-function:step-end}`
+          `${pct(e.t0 + j * e.speed)}%{opacity:1;transform:translateX(${s.toFixed(1)}px);animation-timing-function:step-end}`
         ).join('')
       + (stay ? '' : `${pct(tEnd)}%{opacity:0;transform:translateX(${end}px)}`)
       + `100%{opacity:${stay ? 1 : 0};transform:translateX(${end}px)}}`
     );
-    nodes.push(`<g class="c${i}"><rect class="cur blink" x="${(padx + off * cw).toFixed(1)}"`
+    nodes.push(`<g class="c${i}"><rect class="cur blink" x="${(padx + off).toFixed(1)}"`
       + ` y="${top + e.row * lh + Math.round(fs * 0.1)}" width="${cw.toFixed(1)}"`
       + ` height="${Math.round(fs * 1.3)}" rx="1"/></g>`);
   });
