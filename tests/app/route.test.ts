@@ -84,3 +84,19 @@ describe('the SVG route', () => {
     expect(res.headers.get('content-type')).toBe('text/plain; charset=utf-8');
   });
 });
+
+describe('the SVG route: limits and headers', () => {
+  it('reports a code that inflates past what a tape may be', async () => {
+    const bomb = await encodeTape('out ' + 'x'.repeat(70000) + '\n');
+    const res = await call(['v1', `${bomb}.svg`]);
+    expect(res.status).toBe(413);
+    expect(await res.text()).toBe('decoded tape too long');
+  });
+
+  it('serves the SVG under a policy that cannot run or fetch anything', async () => {
+    const res = await call(['v1', `${await encodeTape(TAPE)}.svg`]);
+    expect(res.headers.get('content-security-policy'))
+      .toBe("default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+});

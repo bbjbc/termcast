@@ -1,4 +1,4 @@
-import { decodeTape, MAX_CODE } from '@/lib/encode';
+import { decodeTape, MAX_CODE, TapeTooLong } from '@/lib/encode';
 import { tapeToSvg } from '@/lib/tapecast';
 
 // Next's local edge emulation has no DecompressionStream. Responses are cached as
@@ -32,7 +32,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ seg: string[] 
   let tape: string;
   try {
     tape = await decodeTape(code);
-  } catch {
+  } catch (e) {
+    // A code inside the URL ceiling can still inflate into something no terminal
+    // demo would be, which is a different complaint from one that will not decode.
+    if (e instanceof TapeTooLong) return fail('decoded tape too long', 413);
     return fail('cannot decode tape', 400);
   }
 
@@ -44,6 +47,11 @@ export async function GET(_req: Request, ctx: { params: Promise<{ seg: string[] 
       'content-type': 'image/svg+xml; charset=utf-8',
       // Same tape and same renderer version, so this is safe to cache forever
       'cache-control': 'public, max-age=31536000, immutable',
+      // The SVG carries text somebody else wrote and is served from this site's
+      // own origin, so a mistake in escaping should not be able to reach the
+      // network or run.
+      'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+      'x-content-type-options': 'nosniff',
     },
   });
 }
