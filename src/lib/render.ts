@@ -19,7 +19,7 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
  * the point: nothing here has to keep old renderers alive, because an address that
  * was published is already frozen in the cache.
  */
-export const RENDERER_VERSION = 1;
+export const RENDERER_VERSION = 2;
 
 // Re-exported because the renderer is where callers expect to find them.
 export { cells, cellWidth } from './metrics';
@@ -37,18 +37,25 @@ export function metrics(cfg: Config) {
   };
 }
 
-/** Group runs of equal-width characters. An exact width per run keeps the grid. */
-function runs(s: string, adv: Advance): { text: string; x: number; w: number }[] {
-  const out: { text: string; x: number; w: number }[] = [];
+/**
+ * Group runs of equal-width characters. An exact width per run keeps the grid.
+ *
+ * The run carries the advance it was opened with. Recovering it by dividing the
+ * accumulated width by the character count looks equivalent and is not: the width
+ * is a running sum of an em fraction, so it drifts, and a long run of one width
+ * would split partway through for no reason anybody could see.
+ */
+function runs(s: string, adv: Advance): { text: string; x: number; w: number; a: number }[] {
+  const out: { text: string; x: number; w: number; a: number }[] = [];
   let x = 0;
   for (const ch of s) {
     const a = adv(ch);
     const last = out[out.length - 1];
-    if (last && last.w / [...last.text].length === a) {
+    if (last && last.a === a) {
       last.text += ch;
       last.w += a;
     } else {
-      out.push({ text: ch, x, w: a });
+      out.push({ text: ch, x, w: a, a });
     }
     x += a;
   }
@@ -123,8 +130,10 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
       stops.push(stops[j] + w);
     });
 
-    // Cursor: mark every landing spot, since steps() drifts once widths are mixed
-    const tEnd = i === lastType ? total : (els[i + 1]?.t0 ?? total);
+    // Cursor: mark every landing spot, since steps() drifts once widths are mixed.
+    // Anything but the last typed line has an element after it, by definition of
+    // lastType, so the next start time is always there to read.
+    const tEnd = i === lastType ? total : els[i + 1].t0;
     const end = stops[chars.length].toFixed(1);
     const stay = tEnd >= total;
     names.push(`c${i}`);
