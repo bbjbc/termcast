@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { colsIn, embedSnippet } from '@/lib/embed';
+import { colsIn, embedSnippet, embedWidths } from '@/lib/embed';
 import { MAX_COLS, MIN_COLS } from '@/lib/tape';
 import { RENDERER_VERSION } from '@/lib/tapecast';
 
@@ -32,10 +32,26 @@ describe('embedSnippet', () => {
     expect(snippet).not.toContain('<source');
   });
 
-  it('asks for both widths at one address', () => {
-    expect(snippet).toBe(
-      `<img src="https://x.dev/t/v${RENDERER_VERSION}/w24-47-71/CODE.svg" width="100%" alt="demo">`,
+  it('asks for every width at one address', () => {
+    expect(snippet).toMatch(
+      new RegExp(`^<img src="https://x\\.dev/t/v${RENDERER_VERSION}/w[\\d-]+/CODE\\.svg" width="100%" alt="demo">$`),
     );
+  });
+
+  it('steps finely enough that a line breaks where it meets the padding', () => {
+    // A layout holds until the next takes over, so the space left at the right
+    // is the distance between two of them. Two columns keeps it under a
+    // character, which is the difference between breaking at the padding and
+    // breaking a dozen characters early.
+    const w = embedWidths(14);
+    w.slice(0, -1).forEach((c, i) => expect(w[i + 1] - c).toBeLessThanOrEqual(2));
+  });
+
+  it('starts under the narrowest README column and ends on the widest', () => {
+    const w = embedWidths(14);
+    expect(w[0]).toBe(colsIn(248, 14));
+    expect(w[w.length - 1]).toBe(colsIn(838, 14));
+    expect([...w].sort((a, b) => a - b)).toEqual(w);
   });
 
   it('lets the window take the column it is given', () => {

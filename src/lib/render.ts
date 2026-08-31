@@ -163,7 +163,10 @@ function layer(cfg: Config, els: El[], rows: number, total: number, prefix: stri
     W,
     H,
     nodes: nodes.join('\n'),
-    css: `${names.map(n => `.${n}{animation:${n} ${dur}s ${iter}}`).join('')}\n${kf.join('\n')}`,
+    // Kept apart because a responsive SVG puts them in different places: the
+    // hooks go inside the layout's own media query, the keyframes outside it.
+    anim: names.map(n => `.${n}{animation:${n} ${dur}s ${iter}}`).join(''),
+    kf: kf.join('\n'),
   };
 }
 
@@ -271,7 +274,7 @@ ${body}${edge}
  */
 export function render(cfg: Config, els: El[], rows: number, total: number, fluid = false): string {
   const l = layer(cfg, els, rows, total, '');
-  return frame(cfg, l.W, l.H, fluid, l.css, l.nodes);
+  return frame(cfg, l.W, l.H, fluid, `${l.anim}\n${l.kf}`, l.nodes);
 }
 
 /**
@@ -291,12 +294,24 @@ export function renderLayers(layers: Layer[]): string {
   const built = layers.map((l, i) => layer(l.cfg, l.els, l.rows, l.total, `L${i}_`));
 
   const H = Math.max(...built.map((b) => b.H));
+
+  // The animation hooks sit inside the media query, next to the display rule.
+  // Firefox and WebKit drop animations on a display:none element the way the
+  // spec says; Chromium keeps every one of them running, so a file holding
+  // thirty layouts would animate thirty times what it shows. Declaring the
+  // hooks only inside the query that reveals a layout leaves the hidden ones
+  // with no animation to keep.
   const css = built.map((b, i) => {
     const lo = i === 0 ? 0 : b.W;
     const q = i === built.length - 1
       ? `@media (min-width:${lo}px)`
       : `@media (min-width:${lo}px) and (max-width:${built[i + 1].W - 1}px)`;
-    return `.L${i}{display:none}\n${q}{.L${i}{display:inline}}\n${b.css}`;
+    // The blink is declared once for the whole document, so it has to be turned
+    // off per layout and back on inside the query, or Chromium goes on blinking
+    // a cursor in every layout it is not showing.
+    const blink = '{animation:blink 1.06s step-end infinite}';
+    return `.L${i}{display:none}\n.L${i} .blink{animation:none}\n`
+      + `${q}{.L${i}{display:inline}\n.L${i} .blink${blink}\n${b.anim}}\n${b.kf}`;
   }).join('\n');
 
   const body = built.map((b, i) => `<g class="L${i}">\n${b.nodes}\n</g>`).join('\n');
