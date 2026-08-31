@@ -13,7 +13,7 @@ A 3 MB GIF becomes 6 KB, stays sharp at any zoom, and follows light and dark.
 [![Next.js](https://img.shields.io/badge/Next.js-16-6b736d?style=flat-square&labelColor=0d0d0d)](https://nextjs.org)
 [![Live](https://img.shields.io/badge/live-termcast.xyz-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast.xyz)
 
-<img src="docs/demo.svg" width="460" alt="termcast demo">
+<img src="docs/demo/demo.svg" width="460" alt="termcast demo">
 
 </div>
 
@@ -38,8 +38,17 @@ not selectable.
 Open [termcast](https://termcast.xyz), pick a preset, edit the tape, and copy the markdown it gives you.
 
 ```html
-<img src="https://termcast.xyz/t/v2/<code>.svg" width="430" alt="demo">
+<img src="https://termcast.xyz/t/v2/w24-47-71/<code>.svg" width="100%" alt="demo">
 ```
+
+A README column is near 250px on a phone and near 840px on a desktop. Scale one image to
+fit both and 14px text lands at 6px on the phone; leave it alone and it runs off the side.
+So the widths in the path are three layouts, wrapped to three column widths and carried in
+the one file, and the SVG picks between them itself: a media query inside an SVG is matched
+against the box the page gave it. The text stays the size it was written at everywhere, and
+the demo needs no `<picture>` and no second address.
+
+`width="100%"` is doing work there. Without it the image falls back to 300px.
 
 Or use **Download SVG** and commit the file, which works with no service behind it.
 
@@ -140,6 +149,10 @@ download instead.
 The `v2` is the renderer version. Since the response is immutable for a year, a URL you have
 already pasted somewhere keeps the picture it was given; improving the renderer bumps the
 version, which is a new address, so nothing published changes under you.
+
+The `w24-47-71` is the widths, and it belongs in the address for the same reason: it is a
+property of where the demo is being shown, not of the demo. `/t/v2/<code>.svg` without it
+still renders the fixed-width picture it always did.
 
 **Nothing is recorded.** You are not capturing a session, you are writing one. No typos, no
 awkward waits, no re-running a command to get a clean take, and you can demo a flag you have

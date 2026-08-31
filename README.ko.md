@@ -13,7 +13,7 @@ GIF 3 MB가 6 KB가 되고, 확대해도 선명하고, 라이트·다크를 따�
 [![Next.js](https://img.shields.io/badge/Next.js-16-6b736d?style=flat-square&labelColor=0d0d0d)](https://nextjs.org)
 [![Live](https://img.shields.io/badge/live-termcast.xyz-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast.xyz)
 
-<img src="docs/demo.svg" width="460" alt="termcast 데모">
+<img src="docs/demo/demo.svg" width="460" alt="termcast 데모">
 
 </div>
 
@@ -36,8 +36,17 @@ CLI 프로젝트는 보통 데모를 GIF로 보여줍니다. GIF는 무겁고, 2
 [termcast](https://termcast.xyz)를 열고, 프리셋을 고르고, 대본을 고친 뒤 나온 마크다운을 복사하면 됩니다.
 
 ```html
-<img src="https://termcast.xyz/t/v2/<code>.svg" width="430" alt="demo">
+<img src="https://termcast.xyz/t/v2/w24-47-71/<code>.svg" width="100%" alt="demo">
 ```
+
+리드미 본문 폭은 휴대폰에서 250px 남짓, 데스크톱에서 840px 남짓입니다. 이미지 하나를
+양쪽에 맞춰 늘였다 줄였다 하면 14px 글자가 휴대폰에서 6px이 되고, 그냥 두면 옆으로
+잘려나갑니다. 그래서 주소에 적힌 세 개의 폭은 세 벌의 배치이고, 한 파일에 같이 들어가
+있다가 SVG가 스스로 하나를 고릅니다. SVG 안의 미디어쿼리는 그 이미지가 실제로 그려진
+상자를 기준으로 판정하기 때문입니다. 덕분에 글자는 어디서나 쓴 그대로의 크기로 남고,
+`<picture>`도 두 번째 주소도 필요 없습니다.
+
+`width="100%"`는 장식이 아닙니다. 빼면 이미지가 300px로 주저앉습니다.
 
 또는 **SVG 다운로드**로 받아 레포에 커밋하세요. 그러면 이 서비스와 무관하게 동작합니다.
 
@@ -136,6 +145,10 @@ Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
 `v2`는 렌더러 버전입니다. 응답이 1년간 immutable이라, 이미 붙여넣은 주소는 처음 받은 그림을
 그대로 유지합니다. 렌더러를 개선하면 버전이 올라가고 그건 새 주소이므로, 이미 공개된 것이
 모르는 사이에 바뀌지 않습니다.
+
+`w24-47-71`은 폭입니다. 주소에 들어가는 이유도 같습니다. 데모 자체의 성질이 아니라 데모가
+어디에 놓이느냐의 성질이니까요. 폭 없이 `/t/v2/<code>.svg`로 부르면 예전처럼 고정 폭
+그림이 나옵니다.
 
 **녹화하지 않습니다.** 세션을 캡처하는 게 아니라 쓰는 겁니다. 오타도, 어색한 대기도, 깨끗한
 화면을 얻으려고 명령을 다시 실행할 일도 없습니다. 아직 만들지 않은 옵션도 데모할 수 있고요.

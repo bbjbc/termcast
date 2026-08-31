@@ -30,6 +30,8 @@ export const cellWidth = (s: string) =>
  * the leftover 0.2em into the gaps between glyphs, so Korean came out visibly
  * letter-spaced. Advancing wide glyphs by their real width fixes that, and the
  * grid stays deterministic because textLength still pins every run.
+ *
+ * @see docs/notes/measurements.md, "Font advances"
  */
 export const LATIN_EM = 0.6;
 export const WIDE_EM = 1.0;
