@@ -53,6 +53,12 @@ describe('flow: one strip instead of one layout per width', () => {
     expect(heightOf(flowOf(LONG))).toBe(narrow);
   });
 
+  it('pulls the drawn window up to its content where the wrap is shorter', () => {
+    // At 60 columns the 120 characters take two rows, plus one for "tail":
+    // no bar, 18px of padding a side, three 22px rows.
+    expect(flowOf(LONG)).toContain('.deep{height:102px}.edge{height:101px}');
+  });
+
   it('reports the rows of the narrow end, same as the layout it replaces', () => {
     expect(tapeToSvg(LONG, { cols: [24, 94] }).rows).toBe(tapeToSvg(LONG, { cols: 24 }).rows);
   });

@@ -235,6 +235,14 @@ export function renderFlow(
     return `<g class="ln${i}">${copies}</g>`;
   }).filter(Boolean).join('\n');
 
+  // The image box is sized once, for the tallest wrap; an <img> cannot grow as
+  // its column narrows, so the spare height has to exist. What can follow the
+  // width is the drawn window: each breakpoint knows its row count, so the
+  // window is pulled up to its content and the spare height stays transparent
+  // page rather than empty terminal.
+  const hAt = (rows: number) => Math.round(bar + pady * 2 + Math.max(rows, cfg.rows) * lh);
+  const H = hAt(rowsLo);
+
   // ------------------------------------------------------------------- css
   // The default rules pin everything to the narrowest width; that is the whole
   // story for an engine without round(), which drops the @supports block and
@@ -349,6 +357,8 @@ export function renderFlow(
       const [i, j, m] = key.split('/').map(Number);
       rules.push(`${hideSel(i, j, m)}{visibility:${hid.has(key) ? 'hidden' : 'visible'}}`);
     }
+    const hC = hAt(wraps.reduce((n, w2) => n + w2.rows, 0));
+    if (hC !== H) rules.push(`.deep{height:${hC}px}.edge{height:${hC - 1}px}`);
     if (!rules.length) return '';
     // Matches where round() first reaches c columns, nudge included.
     const q = k + 1 < steps.length
@@ -373,8 +383,6 @@ export function renderFlow(
     kf.join('\n'),
   ].join('\n');
 
-  const height = Math.max(rowsLo, cfg.rows);
-  const H = Math.round(bar + pady * 2 + height * lh);
   const top = bar + pady;
 
   const clipped = `<clipPath id="win"><rect class="win" x="${padx}" y="0" height="${H}"/></clipPath>

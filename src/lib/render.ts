@@ -222,11 +222,14 @@ export function frame(cfg: Config, W: number, H: number, fluid: boolean, css: st
   // Widths that have to reach the render box live in CSS: a presentation
   // attribute takes no percentage here and no calc anywhere.
   const geo = fluid ? '.pane{width:100%}.edge{width:calc(100% - 1px)}\n' : '';
+  // `deep` marks what spans the window's full height, so the reflowing embed
+  // can pull the window up to its content per width. The bar shares `pane` for
+  // its width but keeps its own height, which is why the class is separate.
   const defs = fluid
-    ? `<defs><clipPath id="pane"><rect class="pane" height="${H}" rx="${cfg.radius}"/></clipPath></defs>\n`
+    ? `<defs><clipPath id="pane"><rect class="pane deep" height="${H}" rx="${cfg.radius}"/></clipPath></defs>\n`
     : '';
   const pane = fluid
-    ? `<rect class="pane" height="${H}" rx="${cfg.radius}" fill="var(--bg)"/>`
+    ? `<rect class="pane deep" height="${H}" rx="${cfg.radius}" fill="var(--bg)"/>`
     : `<rect x=".5" y=".5" width="${W - 1}" height="${H - 1}" rx="${cfg.radius}" fill="var(--bg)" stroke="var(--bd)"/>`;
   // Fixed hides its top border under the bar path, which is inset half a pixel to
   // sit inside the stroke. A fluid bar is full bleed and cannot be, so the border

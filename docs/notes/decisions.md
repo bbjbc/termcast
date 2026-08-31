@@ -78,9 +78,10 @@ wrapped for; the route reads the ends of the list as the range, so they render t
 `src/lib/embed.ts` writes the `<img>` the editor copies.
 
 The cost is still the height. The box is settled before the SVG's CSS runs, so it is sized
-for the narrow end of the range and a wide column gets empty rows under the prompt. A
-terminal with room below the cursor still reads as a terminal, and this is the part of the
-problem an `<img>` genuinely cannot solve.
+for the narrow end of the range and cannot give the spare height back on a wide column.
+This is the part of the problem an `<img>` genuinely cannot solve. What the breakpoints can
+do is pull the drawn window up to its content, since each knows its row count, so the spare
+height is transparent page under a window that fits, not empty rows under a prompt.
 
 ## The tape is bounded by what it decodes to, not by what it compresses to
 
