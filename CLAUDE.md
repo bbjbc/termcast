@@ -168,6 +168,13 @@ bottom, IBM Plex Mono with Nanum Gothic Coding for Korean. Color carries no hier
 lightness and weight do. The only colored things on the page are the rendered demo and
 the swatches that pick its colors. Keep new UI inside that.
 
+The icon is the block cursor, which is already the live thing in the wordmark. One
+rectangle on a dark square, at the 1:2.17 the site's own caret and the rendered cursor
+both use. It started as a generated PNG at 1:3, redrawn because that reads as a hairline
+at 16px and because a shape this simple belongs in `src/app/icon.svg` as a few hundred
+bytes of vector rather than 800 KB of raster. `src/app/apple-icon.png` is the same
+geometry at 180px, since iOS will not take an SVG.
+
 Design exploration lives in `design/` as Claude Design artboards. **It is gitignored: it
 is local working material, not part of what ships.** It was dropped from the repo because
 all of it is Korean, which breaks the English-only rule above, and because the artboards
