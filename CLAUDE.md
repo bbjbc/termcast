@@ -32,6 +32,10 @@ Nothing is queued. Pick from "Open problems".
 - **Everything shipped is English.** UI strings, code comments, parser errors, README.
   Korean lives only in `README.ko.md` and the `ko` dictionary.
 - The user writes and reads Korean, so talk to them in Korean. The artifacts stay English.
+- **Commit subjects take a Conventional Commits prefix:** `feat:`, `fix:`, `docs:`,
+  `chore:`, `refactor:`, `test:`. Lowercase after the colon, imperative, no trailing
+  period. The body stays prose: say what was wrong and why this is the fix, not a
+  changelog of files.
 - Commit messages carry no `Co-Authored-By` trailer.
 - `pnpm lint` and `pnpm build` both have to pass. ESLint is pinned to 9.x because 10
   breaks `eslint-config-next`'s parser.
