@@ -11,3 +11,4 @@ export function tapeToSvg(src: string): Result {
 }
 
 export * from './tape';
+export { RENDERER_VERSION } from './render';

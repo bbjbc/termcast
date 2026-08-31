@@ -38,7 +38,7 @@ not selectable.
 Open [termcast](https://termcast-one.vercel.app), pick a preset, edit the tape, and copy the markdown it gives you.
 
 ```html
-<img src="https://termcast-one.vercel.app/t/<code>.svg" width="430" alt="demo">
+<img src="https://termcast-one.vercel.app/t/v1/<code>.svg" width="430" alt="demo">
 ```
 
 Or use **Download SVG** and commit the file, which works with no service behind it.
@@ -133,9 +133,13 @@ Fonts are the other consequence of that header: no external font loads, so web f
 inside the SVG are ignored and the renderer falls back to a system monospace.
 
 **Links need no database.** The tape is deflated and base64url-encoded into the path, so
-`/t/<code>.svg` renders it on the spot. Same input, same output, so the response is cached as
-immutable. Long tapes exceed what a URL can hold; the editor notices and points you at the
+`/t/v1/<code>.svg` renders it on the spot. Same input, same output, so the response is cached
+as immutable. Long tapes exceed what a URL can hold; the editor notices and points you at the
 download instead.
+
+The `v1` is the renderer version. Since the response is immutable for a year, a URL you have
+already pasted somewhere keeps the picture it was given; improving the renderer bumps the
+version, which is a new address, so nothing published changes under you.
 
 **Nothing is recorded.** You are not capturing a session, you are writing one. No typos, no
 awkward waits, no re-running a command to get a clean take, and you can demo a flag you have
@@ -145,7 +149,7 @@ demo matters, it is on you to make it a real one.
 ## Project layout
 
 ```
-src/app/            routes: the editor page and /t/[code]
+src/app/            routes: the editor page and /t/[...seg]
 src/components/     ui/ primitives, then tape · output · workbench
 src/hooks/          tape state, URL encoding, clipboard
 src/lib/            parser, renderer, highlighter, encoder, all pure

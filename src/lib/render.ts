@@ -6,6 +6,21 @@ import { MIN_COLS, type Config, type El, type Palette, THEMES } from './tape';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/**
+ * Bumped whenever the same tape starts rendering differently.
+ *
+ * `/t/<code>.svg` is addressed by the tape alone and served immutable for a year,
+ * but the output depends on this file too. Without a version in the address a
+ * renderer fix could never reach a URL somebody had already pasted into a README:
+ * the CDN would go on serving the bytes it cached. The version changes the address,
+ * so a new render gets a new one and what is already published stays as it was.
+ *
+ * The route accepts any version and always renders with the current code. That is
+ * the point: nothing here has to keep old renderers alive, because an address that
+ * was published is already frozen in the cache.
+ */
+export const RENDERER_VERSION = 1;
+
 // Re-exported because the renderer is where callers expect to find them.
 export { cells, cellWidth } from './metrics';
 

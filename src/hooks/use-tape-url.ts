@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { MAX_CODE, encodeTape } from '@/lib/encode';
+import { RENDERER_VERSION } from '@/lib/tapecast';
 
 const subscribe = () => () => {};
 
@@ -27,7 +28,11 @@ export function useTapeUrl(source: string) {
   }, [source]);
 
   const tooLong = code.length > MAX_CODE;
-  const url = origin && code && !tooLong ? `${origin}/t/${code}.svg` : '';
+  // The renderer version rides in the path so that changing the renderer changes
+  // the address, and a README that already points at one keeps what it was given.
+  const url = origin && code && !tooLong
+    ? `${origin}/t/v${RENDERER_VERSION}/${code}.svg`
+    : '';
 
   return { code, url, tooLong, pending: !code && !tooLong };
 }

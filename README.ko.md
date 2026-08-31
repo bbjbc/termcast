@@ -36,7 +36,7 @@ CLI 프로젝트는 보통 데모를 GIF로 보여줍니다. GIF는 무겁고, 2
 [termcast](https://termcast-one.vercel.app)를 열고, 프리셋을 고르고, 대본을 고친 뒤 나온 마크다운을 복사하면 됩니다.
 
 ```html
-<img src="https://termcast-one.vercel.app/t/<code>.svg" width="430" alt="demo">
+<img src="https://termcast-one.vercel.app/t/v1/<code>.svg" width="430" alt="demo">
 ```
 
 또는 **SVG 다운로드**로 받아 레포에 커밋하세요. 그러면 이 서비스와 무관하게 동작합니다.
@@ -130,8 +130,12 @@ Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
 시스템 모노스페이스로 떨어집니다.
 
 **링크에 데이터베이스가 필요 없습니다.** 대본은 deflate로 압축해 base64url로 경로에 싣습니다.
-`/t/<code>.svg`가 그 자리에서 렌더하고, 입력이 같으면 출력이 같으므로 응답은 immutable로
+`/t/v1/<code>.svg`가 그 자리에서 렌더하고, 입력이 같으면 출력이 같으므로 응답은 immutable로
 캐시됩니다. 긴 대본은 URL 한도를 넘는데, 그때는 에디터가 다운로드를 권합니다.
+
+`v1`은 렌더러 버전입니다. 응답이 1년간 immutable이라, 이미 붙여넣은 주소는 처음 받은 그림을
+그대로 유지합니다. 렌더러를 개선하면 버전이 올라가고 그건 새 주소이므로, 이미 공개된 것이
+모르는 사이에 바뀌지 않습니다.
 
 **녹화하지 않습니다.** 세션을 캡처하는 게 아니라 쓰는 겁니다. 오타도, 어색한 대기도, 깨끗한
 화면을 얻으려고 명령을 다시 실행할 일도 없습니다. 아직 만들지 않은 옵션도 데모할 수 있고요.
@@ -141,7 +145,7 @@ Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox
 ## 구조
 
 ```
-src/app/            라우트: 에디터 페이지와 /t/[code]
+src/app/            라우트: 에디터 페이지와 /t/[...seg]
 src/components/     ui/ 프리미티브, 그 위에 tape · output · workbench
 src/hooks/          대본 상태, URL 인코딩, 클립보드
 src/lib/            파서, 렌더러, 하이라이터, 인코더. 전부 순수 함수
