@@ -4,7 +4,7 @@
   "private": true,
   "description": "Terminal demos as animated SVG. Write a tape, get a README-ready demo.",
   "license": "MIT",
-  "homepage": "https://www.termcast.xyz",
+  "homepage": "https://termcast.xyz",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bbjbc/termcast.git"
@@ -26,7 +26,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "next": "16.1.6",
+    "next": "16.3.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
