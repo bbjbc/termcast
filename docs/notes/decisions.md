@@ -83,6 +83,29 @@ This is the part of the problem an `<img>` genuinely cannot solve. What the brea
 do is pull the drawn window up to its content, since each knows its row count, so the spare
 height is transparent page under a window that fits, not empty rows under a prompt.
 
+## The GitHub copy is a picture again
+
+A `<picture>` keyed on the viewport was rejected early for picking wrap widths: a viewport
+is not a column, the sidebar case broke the mapping, and mispredicting cut text off. The
+reflow changes what a variant is. Every variant now wraps itself to whatever box it lands
+in; the only thing left to choose is how much height the box reserves, and a mispredicted
+breakpoint costs a couple of blank rows where it used to cost characters.
+
+So the editor copies two forms. The GitHub copy is a `<picture>` with one variant per
+viewport class, each variant's range starting at the narrowest column measured inside that
+class (both page kinds, one column of slack), so the reserve follows the screen: zero on a
+desktop, the phone price only on a phone. The browser downloads exactly one variant, so
+the extra sources cost nothing on the wire. The plain one-line `<img>` stays for anywhere
+that is not GitHub, because the bands are GitHub's own layout and a site with a narrow
+column on a wide viewport would pick a variant wrapped too wide for its box. The fallback
+inside the picture is that same one-liner, which is also what a sanitizer that strips
+`<source>` leaves standing.
+
+What no markup can remove: the reserve inside a band (a couple of rows at worst, the gap
+between the band's floor and the box it actually got) and the line-box descender every
+inline image on GitHub sits on. Measured flat against a GitHub-like page, the multi-line
+markup itself adds nothing.
+
 ## The tape is bounded by what it decodes to, not by what it compresses to
 
 `MAX_CODE` bounds the address. Deflate undoes that, and the renderer amplifies it again,

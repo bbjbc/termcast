@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { embedSnippet } from '@/lib/embed';
+import { embedPicture, embedSnippet } from '@/lib/embed';
 import { MAX_CODE, encodeTape } from '@/lib/encode';
 import { RENDERER_VERSION } from '@/lib/tapecast';
 
@@ -35,9 +35,11 @@ export function useTapeUrl(source: string, font: number) {
     ? `${origin}/t/v${RENDERER_VERSION}/${code}.svg`
     : '';
 
-  // What goes in a README is not the bare address: a column is not one width, so
-  // the embed is a `<picture>` of one variant per breakpoint, all off this tape.
+  // What goes in a GitHub README is a `<picture>` of one variant per viewport
+  // class, so the reserved height follows the screen; the one-line `<img>`
+  // reflows the same way and is the safe form for anywhere else.
   const snippet = url ? embedSnippet(origin, code, font) : '';
+  const picture = url ? embedPicture(origin, code, font) : '';
 
-  return { code, url, snippet, tooLong, pending: !code && !tooLong };
+  return { code, url, snippet, picture, tooLong, pending: !code && !tooLong };
 }

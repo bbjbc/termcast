@@ -50,6 +50,12 @@ break where they meet the padding, and the demo needs no `<picture>` and no seco
 
 `width="100%"` is doing work there. Without it the image falls back to 300px.
 
+The editor's **Copy for GitHub** wraps that line in a `<picture>` with one variant per
+viewport class. An `<img>` box cannot give its spare height back, so the one-liner always
+reserves the height of its narrowest wrap; the picture keys the reserve on the screen
+instead, so a desktop is not paying for a phone. Every variant still reflows, which is why
+a mispredicted breakpoint costs a couple of blank rows and never a character.
+
 Or use **Download SVG** and commit the file, which works with no service behind it.
 
 ```bash

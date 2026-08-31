@@ -128,6 +128,20 @@ case wrong. It is flat at 838 from 1280 up.
 A repository with no About section will be wider than this, which only leaves more space at
 the right. Erring narrow is safe; erring wide cuts text off.
 
+The profile page runs narrower, measured the same way on a live profile:
+
+| viewport | column | viewport | column |
+| --- | --- | --- | --- |
+| 320 | 238 | 768 | 398 |
+| 375 | 293 | 900 | 530 |
+| 414 | 332 | 1012 | 578 |
+| 500 | 418 | 1280 | 846 |
+| 600 | 518 | 1500 | 846 |
+| 700 | 618 | 1920 | 846 |
+
+The bands in `src/lib/embed.ts` take the narrower of the two pages at each viewport class,
+which is what lets one `<picture>` serve both kinds of README.
+
 ## A short address can render an enormous SVG
 
 `MAX_CODE` bounds the compressed code, and deflate undoes that. Every typed character

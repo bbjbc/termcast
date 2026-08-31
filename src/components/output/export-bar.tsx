@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useI18n } from '@/components/i18n';
 import { Button } from '@/components/ui/controls';
@@ -11,13 +11,21 @@ import s from './output.module.css';
 type ExportBarProps = {
   svg: string;
   snippet: string;
+  picture: string;
   tooLong: boolean;
   pending: boolean;
 };
 
-export function ExportBar({ svg, snippet, tooLong, pending }: ExportBarProps) {
+export function ExportBar({ svg, snippet, picture, tooLong, pending }: ExportBarProps) {
   const { t } = useI18n();
   const { copied, copy } = useCopy();
+  // Two things can be copied, so remember which one the confirmation is for.
+  const [which, setWhich] = useState<'github' | 'plain'>('github');
+
+  const grab = useCallback((text: string, kind: 'github' | 'plain') => {
+    setWhich(kind);
+    copy(text);
+  }, [copy]);
 
   const download = useCallback(() => {
     const href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
@@ -37,8 +45,11 @@ export function ExportBar({ svg, snippet, tooLong, pending }: ExportBarProps) {
       )}
 
       <div className={s.actions}>
-        <Button variant="solid" disabled={!snippet} onClick={() => copy(snippet)}>
-          {copied ? t.exportBar.copied : t.exportBar.copy}
+        <Button variant="solid" disabled={!picture} onClick={() => grab(picture, 'github')}>
+          {copied && which === 'github' ? t.exportBar.copied : t.exportBar.copy}
+        </Button>
+        <Button disabled={!snippet} onClick={() => grab(snippet, 'plain')}>
+          {copied && which === 'plain' ? t.exportBar.copied : t.exportBar.copyPlain}
         </Button>
         <Button onClick={download}>{t.exportBar.download}</Button>
       </div>
