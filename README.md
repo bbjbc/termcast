@@ -11,7 +11,7 @@ A 3 MB GIF becomes 6 KB, stays sharp at any zoom, and follows light and dark.
 [![한국어](https://img.shields.io/badge/lang-%ED%95%9C%EA%B5%AD%EC%96%B4-6b736d?style=flat-square&labelColor=0d0d0d)](README.ko.md)
 [![License](https://img.shields.io/badge/license-MIT-6b736d?style=flat-square&labelColor=0d0d0d)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-6b736d?style=flat-square&labelColor=0d0d0d)](https://nextjs.org)
-[![Live](https://img.shields.io/badge/live-termcast--one.vercel.app-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast-one.vercel.app)
+[![Live](https://img.shields.io/badge/live-termcast.xyz-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast.xyz)
 
 <img src="docs/demo.svg" width="460" alt="termcast demo">
 
@@ -35,10 +35,10 @@ not selectable.
 
 ## Quick start
 
-Open [termcast](https://termcast-one.vercel.app), pick a preset, edit the tape, and copy the markdown it gives you.
+Open [termcast](https://termcast.xyz), pick a preset, edit the tape, and copy the markdown it gives you.
 
 ```html
-<img src="https://termcast-one.vercel.app/t/v2/<code>.svg" width="430" alt="demo">
+<img src="https://termcast.xyz/t/v2/<code>.svg" width="430" alt="demo">
 ```
 
 Or use **Download SVG** and commit the file, which works with no service behind it.

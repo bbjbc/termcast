@@ -11,7 +11,7 @@ GIF 3 MB가 6 KB가 되고, 확대해도 선명하고, 라이트·다크를 따�
 [![한국어](https://img.shields.io/badge/lang-%ED%95%9C%EA%B5%AD%EC%96%B4-e8ebe7?style=flat-square&labelColor=0d0d0d)](README.ko.md)
 [![License](https://img.shields.io/badge/license-MIT-6b736d?style=flat-square&labelColor=0d0d0d)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-6b736d?style=flat-square&labelColor=0d0d0d)](https://nextjs.org)
-[![Live](https://img.shields.io/badge/live-termcast--one.vercel.app-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast-one.vercel.app)
+[![Live](https://img.shields.io/badge/live-termcast.xyz-e8ebe7?style=flat-square&labelColor=0d0d0d)](https://termcast.xyz)
 
 <img src="docs/demo.svg" width="460" alt="termcast 데모">
 
@@ -33,10 +33,10 @@ CLI 프로젝트는 보통 데모를 GIF로 보여줍니다. GIF는 무겁고, 2
 
 ## 빠른 시작
 
-[termcast](https://termcast-one.vercel.app)를 열고, 프리셋을 고르고, 대본을 고친 뒤 나온 마크다운을 복사하면 됩니다.
+[termcast](https://termcast.xyz)를 열고, 프리셋을 고르고, 대본을 고친 뒤 나온 마크다운을 복사하면 됩니다.
 
 ```html
-<img src="https://termcast-one.vercel.app/t/v2/<code>.svg" width="430" alt="demo">
+<img src="https://termcast.xyz/t/v2/<code>.svg" width="430" alt="demo">
 ```
 
 또는 **SVG 다운로드**로 받아 레포에 커밋하세요. 그러면 이 서비스와 무관하게 동작합니다.

@@ -3,7 +3,7 @@
 Terminal demos as animated SVG. You write a tape, the renderer turns it into an SVG
 you can drop into a README.
 
-- Live: https://termcast-one.vercel.app
+- Live: https://termcast.xyz
 - Repo: https://github.com/bbjbc/termcast (private)
 - Editor pages: `/en`, `/ko`. Bare `/` redirects by `Accept-Language`.
 - SVG endpoint: `/t/v<n>/<code>.svg`, where `<code>` is the deflated tape and `<n>` is
