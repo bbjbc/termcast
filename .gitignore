@@ -9,3 +9,6 @@ design/
 
 # Scratch output from the browser automation tool
 .playwright-mcp/
+
+# Coverage output
+coverage/

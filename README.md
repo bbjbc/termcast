@@ -38,7 +38,7 @@ not selectable.
 Open [termcast](https://termcast-one.vercel.app), pick a preset, edit the tape, and copy the markdown it gives you.
 
 ```html
-<img src="https://termcast-one.vercel.app/t/v1/<code>.svg" width="430" alt="demo">
+<img src="https://termcast-one.vercel.app/t/v2/<code>.svg" width="430" alt="demo">
 ```
 
 Or use **Download SVG** and commit the file, which works with no service behind it.
@@ -133,11 +133,11 @@ Fonts are the other consequence of that header: no external font loads, so web f
 inside the SVG are ignored and the renderer falls back to a system monospace.
 
 **Links need no database.** The tape is deflated and base64url-encoded into the path, so
-`/t/v1/<code>.svg` renders it on the spot. Same input, same output, so the response is cached
+`/t/v2/<code>.svg` renders it on the spot. Same input, same output, so the response is cached
 as immutable. Long tapes exceed what a URL can hold; the editor notices and points you at the
 download instead.
 
-The `v1` is the renderer version. Since the response is immutable for a year, a URL you have
+The `v2` is the renderer version. Since the response is immutable for a year, a URL you have
 already pasted somewhere keeps the picture it was given; improving the renderer bumps the
 version, which is a new address, so nothing published changes under you.
 
@@ -169,7 +169,14 @@ so there is no compression library.
 pnpm dev        # http://localhost:3210
 pnpm build
 pnpm lint
+pnpm test
+pnpm coverage   # the same run, gated at 100%
 ```
+
+The suite covers the logic: the parser, the renderer, the width arithmetic, the encoder,
+the SVG route and the locale redirect. It runs in plain node, because none of that needs a
+browser. Components are left to the browser check instead, since asserting markup shape
+breaks on every layout change without catching much.
 
 ## Languages
 

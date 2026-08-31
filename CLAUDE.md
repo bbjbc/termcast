@@ -16,12 +16,15 @@ up the work.
 
 Everything is committed, pushed and deployed. The working tree is clean.
 
-The last run through the code did four things: wide glyphs advance by their real width,
-the workbench went to three columns with the demo in the middle, lines wrap at the window
-width, and the URL carries a renderer version.
+The last run through the code: wide glyphs advance by their real width, the workbench went
+to three columns with the demo in the middle, lines wrap at the window width, the URL
+carries a renderer version, and there is a test suite behind a 100% gate on the logic.
 
-Two of the three items that used to sit here are closed. Cache versioning is built, see
-below. Font embedding was measured against a real screen and turned down, also below.
+All three items that used to sit here are closed. Cache versioning is built, font embedding
+was measured against a real screen and turned down, and the tests exist. See below for each.
+
+`RENDERER_VERSION` is at 2. It went up when `runs()` was fixed, which is the mechanism
+working as intended rather than anything to worry about.
 
 Nothing is queued. Pick from "Open problems".
 
@@ -37,8 +40,10 @@ Nothing is queued. Pick from "Open problems".
   period. The body stays prose: say what was wrong and why this is the fix, not a
   changelog of files.
 - Commit messages carry no `Co-Authored-By` trailer.
-- `pnpm lint` and `pnpm build` both have to pass. ESLint is pinned to 9.x because 10
-  breaks `eslint-config-next`'s parser.
+- `pnpm lint`, `pnpm build` and `pnpm test` all have to pass. ESLint is pinned to 9.x
+  because 10 breaks `eslint-config-next`'s parser.
+- **`pnpm coverage` has to come back at 100%.** The gate covers the logic, not the React
+  tree; see "Tests" below for where the line is drawn and why.
 
 ## Architecture, and why
 
@@ -125,8 +130,36 @@ the UI. Deferred deliberately.
 **No spinner or progress command.** An install demo is the most common use and there is
 no way to show a spinner. Needs a notion of overwriting a line in the renderer.
 
-**No tests.** Verification so far has been a headless browser plus measurement scripts.
-`src/lib` is pure and would be straightforward to test.
+**The React tree has no tests.** Everything under `src/components` and `src/hooks` is
+outside the coverage gate, and the browser check is what covers it. That is a deliberate
+line, not an omission: see "Tests".
+
+## Tests
+
+`pnpm test` runs them, `pnpm coverage` runs them with the gate. Vitest, plain node, no DOM.
+
+**The gate is 100% on the logic:** `src/lib`, the SVG route and the locale redirect. All
+four counters, statements, branches, functions and lines. It fails the run rather than
+printing a number nobody reads.
+
+**The React tree is outside it on purpose.** Covering JSX means asserting markup shape,
+which breaks on every layout change while catching nothing; the browser check earns more
+there. If a component grows real logic, move that logic into `src/lib` and it comes under
+the gate for free.
+
+Tests live in `tests/`, mirroring `src/`. They are written against behaviour, not line
+counts: reaching for a test that only exists to touch a line usually means the line should
+not be there. Two branches were deleted rather than covered, both of them unreachable.
+
+Writing these found two things worth knowing:
+
+- `runs()` compared a run's average width against the next advance. Widths are running
+  sums of an em fraction, so they drift, and a long stretch of one width split partway
+  through for no visible reason. A preset carried four or five more `<text>` nodes than
+  it needed. The run now carries the advance it was opened with.
+- The cursor blink is `infinite` whatever `loop` says, so a test asserting that `loop off`
+  produces no infinite animation passes for the wrong reason. Check the element
+  animations, not the whole document.
 
 ## Design
 
