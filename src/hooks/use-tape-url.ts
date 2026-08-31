@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
+import { embedSnippet } from '@/lib/embed';
 import { MAX_CODE, encodeTape } from '@/lib/encode';
 import { RENDERER_VERSION } from '@/lib/tapecast';
 
@@ -11,7 +12,7 @@ const subscribe = () => () => {};
  * Compress the tape into an address. A link is then self-contained, with no store
  * and no database, at the cost of a ceiling: past it we point people at the file.
  */
-export function useTapeUrl(source: string) {
+export function useTapeUrl(source: string, font: number) {
   const [code, setCode] = useState('');
 
   // The server cannot know the origin. useSyncExternalStore gives it an empty
@@ -34,5 +35,9 @@ export function useTapeUrl(source: string) {
     ? `${origin}/t/v${RENDERER_VERSION}/${code}.svg`
     : '';
 
-  return { code, url, tooLong, pending: !code && !tooLong };
+  // What goes in a README is not the bare address: a column is not one width, so
+  // the embed is a `<picture>` of one variant per breakpoint, all off this tape.
+  const snippet = url ? embedSnippet(origin, code, font) : '';
+
+  return { code, url, snippet, tooLong, pending: !code && !tooLong };
 }

@@ -10,16 +10,14 @@ import s from './output.module.css';
 
 type ExportBarProps = {
   svg: string;
-  url: string;
-  width: number;
+  snippet: string;
   tooLong: boolean;
   pending: boolean;
 };
 
-export function ExportBar({ svg, url, width, tooLong, pending }: ExportBarProps) {
+export function ExportBar({ svg, snippet, tooLong, pending }: ExportBarProps) {
   const { t } = useI18n();
   const { copied, copy } = useCopy();
-  const markdown = url ? `<img src="${url}" width="${width}" alt="demo">` : '';
 
   const download = useCallback(() => {
     const href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
@@ -35,11 +33,11 @@ export function ExportBar({ svg, url, width, tooLong, pending }: ExportBarProps)
       {tooLong ? (
         <p className={s.note}>{t.exportBar.tooLong}</p>
       ) : (
-        <code className={s.snippet}>{markdown || (pending ? t.exportBar.building : ' ')}</code>
+        <code className={s.snippet}>{snippet || (pending ? t.exportBar.building : ' ')}</code>
       )}
 
       <div className={s.actions}>
-        <Button variant="solid" disabled={!markdown} onClick={() => copy(markdown)}>
+        <Button variant="solid" disabled={!snippet} onClick={() => copy(snippet)}>
           {copied ? t.exportBar.copied : t.exportBar.copy}
         </Button>
         <Button onClick={download}>{t.exportBar.download}</Button>

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { metrics, render, RENDERER_VERSION } from '@/lib/render';
 import { tapeToSvg } from '@/lib/tapecast';
-import { DEFAULTS, type Config, type El } from '@/lib/tape';
+import { DEFAULTS, MIN_COLS, type Config, type El } from '@/lib/tape';
 
 const cfg = (over: Partial<Config> = {}): Config => ({ ...DEFAULTS, colors: {}, ...over });
 const svgOf = (tape: string) => tapeToSvg(tape).svg;
@@ -263,5 +263,95 @@ describe('tapeToSvg', () => {
 
   it('reports the config it actually used', () => {
     expect(tapeToSvg('cols 40\n').cfg.cols).toBe(40);
+  });
+});
+
+describe('render: a fluid window', () => {
+  const fluid = (tape: string, cols: number) => tapeToSvg(tape, { cols }).svg;
+
+  it('lets the window take the box it is given', () => {
+    const svg = fluid('out hi\n', 40);
+    expect(svg).toContain('width="100%"');
+    expect(svg).not.toContain('viewBox');
+    expect(svg).toContain('.pane{width:100%}');
+  });
+
+  it('leaves the fixed window exactly as it was', () => {
+    expect(svgOf('out hi\n')).toContain('viewBox="0 0');
+    expect(svgOf('out hi\n')).not.toContain('width="100%"');
+  });
+
+  it('grows taller as the width it is wrapped to narrows', () => {
+    const tape = 'out the quick brown fox jumps over the lazy dog\n';
+    expect(heightOf(fluid(tape, 24))).toBeGreaterThan(heightOf(fluid(tape, 80)));
+  });
+
+  it('keeps the authored font size at every width', () => {
+    const size = (svg: string) => svg.match(/font-size="(\d+)"/)![1];
+    expect(size(fluid('out hi\n', 24))).toBe(size(fluid('out hi\n', 80)));
+  });
+
+  it('holds a width under the floor at the floor', () => {
+    const tape = 'out the quick brown fox jumps over the lazy dog\n';
+    expect(fluid(tape, 4)).toBe(fluid(tape, MIN_COLS));
+  });
+
+  it('draws the bar as a rect cut to the pane, since it cannot name its width', () => {
+    const svg = fluid('out hi\n', 40);
+    expect(svg).toContain('clip-path="url(#pane)"');
+    expect(svg).not.toContain('<path');
+  });
+
+  it('closes the border over the bar', () => {
+    expect(fluid('out hi\n', 40)).toMatch(/class="edge"[^>]*stroke="var\(--bd\)"\/>\n<\/svg>$/);
+  });
+
+  it('leaves out the chrome when the tape asks for none', () => {
+    const svg = fluid('chrome none\n\nout hi\n', 40);
+    expect(svg).not.toContain('clip-path');
+    expect(svg).toContain('width="100%"');
+  });
+
+  it('centres a title that has room, so it stays centred as the bar widens', () => {
+    expect(fluid('title hi\n\nout x\n', 60)).toContain('<text x="50%"');
+  });
+
+  it('carries several layouts in one image, widest wins where it fits', () => {
+    const tape = 'out the quick brown fox jumps over the lazy dog\n';
+    const svg = tapeToSvg(tape, { cols: [24, 60] }).svg;
+    expect(svg).toContain('.L0{display:none}');
+    expect(svg).toContain('.L1{display:none}');
+    // L0 holds everything below the width L1 needs, then hands over exactly there.
+    const [, hi] = /max-width:(\d+)px\)\{\.L0/.exec(svg)!;
+    const [, lo] = /min-width:(\d+)px\)\{\.L1/.exec(svg)!;
+    expect(Number(lo)).toBe(Number(hi) + 1);
+  });
+
+  it('gives every layout its own animation names, so they cannot collide', () => {
+    const svg = tapeToSvg('out hi\n', { cols: [24, 60] }).svg;
+    expect(svg).toContain('@keyframes L0_o0');
+    expect(svg).toContain('@keyframes L1_o0');
+  });
+
+  it('takes the tallest layout as the height, since an img cannot resize itself', () => {
+    const tape = 'out the quick brown fox jumps over the lazy dog\n';
+    const narrow = heightOf(tapeToSvg(tape, { cols: 24 }).svg);
+    expect(heightOf(tapeToSvg(tape, { cols: [24, 60] }).svg)).toBe(narrow);
+  });
+
+  it('treats a repeated width as the one layout it is', () => {
+    expect(tapeToSvg('out hi\n', { cols: [40, 40] }).svg)
+      .toBe(tapeToSvg('out hi\n', { cols: 40 }).svg);
+  });
+
+  it('sorts layouts narrowest first however they arrive', () => {
+    expect(tapeToSvg('out hi\n', { cols: [60, 24] }).svg)
+      .toBe(tapeToSvg('out hi\n', { cols: [24, 60] }).svg);
+  });
+
+  it('keeps the offset of a title that had to clear the dots', () => {
+    const svg = fluid('title a very long window title indeed\n\nout x\n', 20);
+    expect(svg).toMatch(/<text x="\d/);
+    expect(svg).not.toContain('<text x="50%"');
   });
 });

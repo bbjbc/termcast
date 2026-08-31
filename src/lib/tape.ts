@@ -65,6 +65,12 @@ export const COLORS = COLOR_KEYS;
  */
 export const MIN_COLS = 20;
 
+/**
+ * Widest window worth drawing, and the ceiling the SVG route enforces on a width
+ * it is handed in the address.
+ */
+export const MAX_COLS = 200;
+
 /** "400" | "400ms" | "1.5s" -> ms */
 export function parseMs(value: string): number {
   const m = value.trim().match(/^([\d.]+)\s*(ms|s)?$/);
@@ -122,7 +128,7 @@ export function parse(src: string): { cfg: Config; cmds: Cmd[]; errors: TapeErro
         case 'loop':   cfg.loop = oneOf(arg, 'loop', ['on', 'off'] as const) === 'on'; break;
         case 'hold':   cfg.hold = parseMs(arg); break;
         case 'font':   cfg.font = parseNum(arg, 'font', 8, 32); break;
-        case 'cols':   cfg.cols = floorCols(parseNum(arg, 'cols', 0, 200)); break;
+        case 'cols':   cfg.cols = floorCols(parseNum(arg, 'cols', 0, MAX_COLS)); break;
         case 'rows':   cfg.rows = parseNum(arg, 'rows', 0, 80); break;
         case 'radius': cfg.radius = parseNum(arg, 'radius', 0, 24); break;
 

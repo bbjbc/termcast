@@ -61,13 +61,21 @@ function runs(s: string, adv: Advance): { text: string; x: number; w: number; a:
   }
   return out;
 }
+export type Layer = { cfg: Config; els: El[]; rows: number; total: number };
 
-export function render(cfg: Config, els: El[], rows: number, total: number): string {
+/**
+ * One layout: its text, its cursor, and the keyframes that drive both.
+ *
+ * `prefix` namespaces every animation, because a responsive SVG carries several
+ * of these at once and they would otherwise all answer to `t0_0`.
+ */
+function layer(cfg: Config, els: El[], rows: number, total: number, prefix: string) {
   const { fs, cw, wide, lh, padx, pady, bar } = metrics(cfg);
   const adv = advanceOf(cw, wide);
   const pct = (t: number) => Math.max(0.0001, Math.min(100, (t / total) * 100)).toFixed(4);
   const dur = (total / 1000).toFixed(2);
   const iter = cfg.loop ? 'infinite' : '1 both';
+  const nm = (s: string) => `${prefix}${s}`;
 
   const promptGap = (prompt: string) => (prompt ? textWidth(prompt, adv) + cw : 0);
 
@@ -106,16 +114,16 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
 
     if (e.kind === 'out') {
       if (!e.text.length) return;                       // blank lines only take space
-      appear(`o${i}`, e.t0);
-      const cls = `${e.tone === 'out' ? 'fg' : e.tone} o${i}`;
+      appear(nm(`o${i}`), e.t0);
+      const cls = `${e.tone === 'out' ? 'fg' : e.tone} ${nm(`o${i}`)}`;
       for (const r of runs(e.text, adv)) nodes.push(piece(cls, r.x, y, r.text, r.w));
       return;
     }
 
     const off = promptGap(e.prompt);
     if (e.prompt) {                                     // the prompt is already there; only the command types in
-      appear(`p${i}`, e.t0);
-      nodes.push(piece(`dim p${i}`, 0, y, e.prompt, textWidth(e.prompt, adv)));
+      appear(nm(`p${i}`), e.t0);
+      nodes.push(piece(`dim ${nm(`p${i}`)}`, 0, y, e.prompt, textWidth(e.prompt, adv)));
     }
 
     // Characters appear one by one at cumulative offsets, so mixed widths stay aligned.
@@ -124,8 +132,8 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
     chars.forEach((ch, j) => {
       const w = adv(ch);
       if (ch !== ' ') {
-        appear(`t${i}_${j}`, e.t0 + j * e.speed);
-        nodes.push(piece(`fg t${i}_${j}`, off + stops[j], y, ch, w));
+        appear(nm(`t${i}_${j}`), e.t0 + j * e.speed);
+        nodes.push(piece(`fg ${nm(`t${i}_${j}`)}`, off + stops[j], y, ch, w));
       }
       stops.push(stops[j] + w);
     });
@@ -136,9 +144,9 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
     const tEnd = i === lastType ? total : els[i + 1].t0;
     const end = stops[chars.length].toFixed(1);
     const stay = tEnd >= total;
-    names.push(`c${i}`);
+    names.push(nm(`c${i}`));
     kf.push(
-      `@keyframes c${i}{`
+      `@keyframes ${nm(`c${i}`)}{`
       + `0%{opacity:0;transform:translateX(0);animation-timing-function:step-end}`
       + stops.map((s, j) =>
           `${pct(e.t0 + j * e.speed)}%{opacity:1;transform:translateX(${s.toFixed(1)}px);animation-timing-function:step-end}`
@@ -146,10 +154,28 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
       + (stay ? '' : `${pct(tEnd)}%{opacity:0;transform:translateX(${end}px)}`)
       + `100%{opacity:${stay ? 1 : 0};transform:translateX(${end}px)}}`
     );
-    nodes.push(`<g class="c${i}"><rect class="cur blink" x="${(padx + off).toFixed(1)}"`
+    nodes.push(`<g class="${nm(`c${i}`)}"><rect class="cur blink" x="${(padx + off).toFixed(1)}"`
       + ` y="${top + e.row * lh + Math.round(fs * 0.1)}" width="${cw.toFixed(1)}"`
       + ` height="${Math.round(fs * 1.3)}" rx="1"/></g>`);
   });
+
+  return {
+    W,
+    H,
+    nodes: nodes.join('\n'),
+    css: `${names.map(n => `.${n}{animation:${n} ${dur}s ${iter}}`).join('')}\n${kf.join('\n')}`,
+  };
+}
+
+/**
+ * The window around one or more layouts.
+ *
+ * `W` is the narrowest layout's width. Fixed output is drawn to it exactly;
+ * fluid output treats it as a floor and stretches past it, which is why the
+ * title is trimmed against it rather than against whatever box turns up.
+ */
+function frame(cfg: Config, W: number, H: number, fluid: boolean, css: string, body: string): string {
+  const { fs, padx, bar } = metrics(cfg);
 
   const pal = (base: Palette) => Object.entries({ ...base, ...cfg.colors })
     .map(([k, v]) => `--${k}:${v}`).join(';');
@@ -176,32 +202,103 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
     const text = ellipsize(cfg.title, right - left, tadv);
     if (!text) return '';
     const half = textWidth(text, tadv) / 2;
-    const x = Math.min(Math.max(W / 2, left + half), right - half);
-    return `<text x="${x.toFixed(1)}" y="${bar / 2 + fs * 0.3}" text-anchor="middle"`
+    const cx = Math.min(Math.max(W / 2, left + half), right - half);
+    // Centred stays centred as the bar widens, but a title that had to be pushed
+    // clear of the dots at the floor width keeps the offset it was given.
+    const x = fluid && cx === W / 2 ? '50%' : cx.toFixed(1);
+    return `<text x="${x}" y="${bar / 2 + fs * 0.3}" text-anchor="middle"`
       + ` fill="var(--ti)" font-size="${tf.toFixed(1)}">${esc(text)}</text>`;
   };
 
   const chrome = cfg.chrome === 'none' ? '' : [
-    `<path d="M.5 ${cfg.radius + .5}A${cfg.radius} ${cfg.radius} 0 0 1 ${cfg.radius + .5}.5h${W - cfg.radius * 2 - 1}a${cfg.radius} ${cfg.radius} 0 0 1 ${cfg.radius} ${cfg.radius}V${bar}H.5Z" fill="var(--bar)"/>`,
-    `<line x1="0" y1="${bar}" x2="${W}" y2="${bar}" stroke="var(--bd)"/>`,
+    // The fixed bar is a path because it has to round only its top corners at a
+    // known width. A fluid one cannot name its width, so it is a plain rect cut
+    // to the pane's rounded outline instead.
+    fluid
+      ? `<rect class="pane" height="${bar}" fill="var(--bar)" clip-path="url(#pane)"/>`
+      : `<path d="M.5 ${cfg.radius + .5}A${cfg.radius} ${cfg.radius} 0 0 1 ${cfg.radius + .5}.5h${W - cfg.radius * 2 - 1}a${cfg.radius} ${cfg.radius} 0 0 1 ${cfg.radius} ${cfg.radius}V${bar}H.5Z" fill="var(--bar)"/>`,
+    `<line x1="0" y1="${bar}" x2="${fluid ? '100%' : W}" y2="${bar}" stroke="var(--bd)"/>`,
     cfg.chrome === 'mac'
       ? [0, 1, 2].map(i => `<circle cx="${dotX(i)}" cy="${bar / 2}" r="${dotR.toFixed(1)}" fill="var(--dot)"/>`).join('')
       : '',
     titleNode(),
   ].join('');
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,'DejaVu Sans Mono',monospace" font-size="${fs}">
+  const size = fluid
+    ? `width="100%" height="${H}"`
+    : `width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"`;
+  // Widths that have to reach the render box live in CSS: a presentation
+  // attribute takes no percentage here and no calc anywhere.
+  const geo = fluid ? '.pane{width:100%}.edge{width:calc(100% - 1px)}\n' : '';
+  const defs = fluid
+    ? `<defs><clipPath id="pane"><rect class="pane" height="${H}" rx="${cfg.radius}"/></clipPath></defs>\n`
+    : '';
+  const pane = fluid
+    ? `<rect class="pane" height="${H}" rx="${cfg.radius}" fill="var(--bg)"/>`
+    : `<rect x=".5" y=".5" width="${W - 1}" height="${H - 1}" rx="${cfg.radius}" fill="var(--bg)" stroke="var(--bd)"/>`;
+  // Fixed hides its top border under the bar path, which is inset half a pixel to
+  // sit inside the stroke. A fluid bar is full bleed and cannot be, so the border
+  // is drawn last and closes over it instead.
+  const edge = fluid
+    ? `\n<rect class="edge" x=".5" y=".5" height="${H - 1}" rx="${cfg.radius}" fill="none" stroke="var(--bd)"/>`
+    : '';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" ${size} font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,'DejaVu Sans Mono',monospace" font-size="${fs}">
 <style>
 ${vars}
 .fg{fill:var(--fg)}.dim{fill:var(--dim)}.cur{fill:var(--fg)}
 .ok{fill:var(--ok)}.err{fill:var(--err)}.warn{fill:var(--warn)}
 .blink{animation:blink 1.06s step-end infinite}
 @keyframes blink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
-${names.map(n => `.${n}{animation:${n} ${dur}s ${iter}}`).join('')}
-${kf.join('\n')}
+${geo}${css}
 </style>
-<rect x=".5" y=".5" width="${W - 1}" height="${H - 1}" rx="${cfg.radius}" fill="var(--bg)" stroke="var(--bd)"/>
+${defs}${pane}
 ${chrome}
-${nodes.join('\n')}
+${body}${edge}
 </svg>`;
+}
+
+/**
+ * `fluid` drops the viewBox and lets the window widen to whatever box the page
+ * gives it.
+ *
+ * A viewBox scales the whole drawing; without one a user unit is a CSS pixel, so
+ * the text stays the size it was authored at and only the chrome stretches. What
+ * it does not do is reflow: the wrap is baked in by `build`, so `W` becomes a
+ * floor and anything past the render box is cut off rather than shrunk.
+ *
+ * @see docs/notes/measurements.md, "SVG in an `<img>`"
+ */
+export function render(cfg: Config, els: El[], rows: number, total: number, fluid = false): string {
+  const l = layer(cfg, els, rows, total, '');
+  return frame(cfg, l.W, l.H, fluid, l.css, l.nodes);
+}
+
+/**
+ * Several layouts in one image, with CSS picking the widest that fits.
+ *
+ * Layers arrive narrowest first. Each takes over at its own width, so a layout
+ * is never shown in a box too small for it, and the narrowest also covers
+ * everything below it because there is nothing better to fall back to.
+ *
+ * The height cannot follow: an `<img>` fixes its box before the SVG's own CSS
+ * runs, so every layout shares the tallest one's height and the wider ones leave
+ * empty rows below the prompt.
+ *
+ * @see docs/notes/decisions.md, "The embed carries its layouts in one file"
+ */
+export function renderLayers(layers: Layer[]): string {
+  const built = layers.map((l, i) => layer(l.cfg, l.els, l.rows, l.total, `L${i}_`));
+
+  const H = Math.max(...built.map((b) => b.H));
+  const css = built.map((b, i) => {
+    const lo = i === 0 ? 0 : b.W;
+    const q = i === built.length - 1
+      ? `@media (min-width:${lo}px)`
+      : `@media (min-width:${lo}px) and (max-width:${built[i + 1].W - 1}px)`;
+    return `.L${i}{display:none}\n${q}{.L${i}{display:inline}}\n${b.css}`;
+  }).join('\n');
+
+  const body = built.map((b, i) => `<g class="L${i}">\n${b.nodes}\n</g>`).join('\n');
+  return frame(layers[0].cfg, built[0].W, H, true, css, body);
 }

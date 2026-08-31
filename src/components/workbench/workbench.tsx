@@ -19,7 +19,7 @@ const FILE = 'tape.tape';
  */
 export function Workbench({ initialTape }: { initialTape: string }) {
   const tape = useTape(initialTape);
-  const link = useTapeUrl(tape.source);
+  const link = useTapeUrl(tape.source, tape.cfg.font);
 
   return (
     <div className={s.shell}>
@@ -41,7 +41,7 @@ export function Workbench({ initialTape }: { initialTape: string }) {
             svg={tape.svg}
             dataUrl={tape.dataUrl}
             width={tape.width}
-            url={link.url}
+            snippet={link.snippet}
             tooLong={link.tooLong}
             pending={link.pending}
           />

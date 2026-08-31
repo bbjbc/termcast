@@ -85,6 +85,56 @@ describe('the SVG route', () => {
   });
 });
 
+describe('the SVG route: a width in the address', () => {
+  const LONG = 'chrome none\n\nout the quick brown fox jumps over the lazy dog\n';
+
+  it('renders a fluid window instead of a fixed one', async () => {
+    const res = await call(['v1', 'w40', `${await encodeTape(TAPE)}.svg`]);
+    const svg = await res.text();
+    expect(res.status).toBe(200);
+    expect(svg).toContain('width="100%"');
+    expect(svg).not.toContain('viewBox');
+  });
+
+  it('wraps to the width in the address, so a narrow one is taller', async () => {
+    const code = `${await encodeTape(LONG)}.svg`;
+    const [narrow, wide] = await Promise.all([call(['v1', 'w24', code]), call(['v1', 'w80', code])]);
+    const h = async (r: Response) => Number((await r.text()).match(/height="(\d+)"/)![1]);
+    expect(await h(narrow)).toBeGreaterThan(await h(wide));
+  });
+
+  it('takes several widths as layouts in one image', async () => {
+    const res = await call(['v1', 'w24-60', `${await encodeTape(LONG)}.svg`]);
+    const svg = await res.text();
+    expect(res.status).toBe(200);
+    expect(svg).toContain('.L0{display:none}');
+    expect(svg).toContain('.L1{display:none}');
+  });
+
+  it('refuses a width past the ceiling anywhere in the list', async () => {
+    const res = await call(['v1', 'w24-201', `${await encodeTape(TAPE)}.svg`]);
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe('width out of range');
+  });
+
+  it('refuses a second segment that is not a width', async () => {
+    const res = await call(['v1', 'nope', `${await encodeTape(TAPE)}.svg`]);
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe('not found');
+  });
+
+  it('refuses a width past what a tape may ask for', async () => {
+    const res = await call(['v1', 'w201', `${await encodeTape(TAPE)}.svg`]);
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe('width out of range');
+  });
+
+  it('refuses more segments than a width leaves room for', async () => {
+    const res = await call(['v1', 'w40', 'extra', `${await encodeTape(TAPE)}.svg`]);
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('the SVG route: limits and headers', () => {
   it('reports a code that inflates past what a tape may be', async () => {
     const bomb = await encodeTape('out ' + 'x'.repeat(70000) + '\n');
