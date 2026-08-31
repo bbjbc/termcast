@@ -6,25 +6,24 @@ you can drop into a README.
 - Live: https://termcast-one.vercel.app
 - Repo: https://github.com/bbjbc/termcast (private)
 - Editor pages: `/en`, `/ko`. Bare `/` redirects by `Accept-Language`.
-- SVG endpoint: `/t/<code>.svg`, where `<code>` is the deflated tape
+- SVG endpoint: `/t/v<n>/<code>.svg`, where `<code>` is the deflated tape and `<n>` is
+  `RENDERER_VERSION`. `/t/<code>.svg` still resolves, for addresses that predate it.
 
 Read `README.md` for the product and the tape grammar. This file is for whoever picks
 up the work.
 
 ## Where things stand
 
-Three commits are pushed and deployed. **One fix is uncommitted:** `src/lib/render.ts`
-carries the CJK advance fix described below, verified locally but not on production.
+Everything is committed, pushed and deployed. The working tree is clean.
 
-Next, in order:
+The last run through the code did four things: wide glyphs advance by their real width,
+the workbench went to three columns with the demo in the middle, lines wrap at the window
+width, and the URL carries a renderer version.
 
-1. Commit the renderer fix and push. Vercel deploys on push.
-2. **Add a renderer version to the URL before anyone relies on the current ones.**
-   `/t/<code>.svg` is content addressed on the tape alone and served with
-   `cache-control: immutable, max-age=31536000`, but the output also depends on the
-   renderer. So the CJK fix above will never reach an already published URL. A version
-   segment or query is needed for a renderer change to produce a new address.
-3. Font subsetting and embedding. Measured and prototyped, see below.
+Two of the three items that used to sit here are closed. Cache versioning is built, see
+below. Font embedding was measured against a real screen and turned down, also below.
+
+Nothing is queued. Pick from "Open problems".
 
 ## Conventions
 
@@ -92,13 +91,28 @@ that was checked by replaying the exact header locally.
 
 ## Open problems
 
-**Cache versioning.** Described under "Where things stand". This blocks any renderer
-improvement from reaching published URLs, so it is the highest priority after the fix
-is committed.
+**Cache versioning is done.** `RENDERER_VERSION` in `src/lib/render.ts` goes into the
+path, and `src/app/t/[...seg]/route.ts` accepts `/t/v<n>/<code>.svg` as well as the bare
+`/t/<code>.svg`. Bump the constant whenever the same tape starts rendering differently:
+that is the whole ritual. The route checks the version for shape and then drops it, because
+it exists to change the address, not to select a renderer. An address that was published is
+already frozen in the CDN, so no old renderer has to be kept alive.
 
-**Font embedding.** Everything is measured, nothing is built. It would make output
-identical across machines, which system fallbacks cannot do: Consolas at 0.550em leaves
-Windows about 9 percent looser than Linux for the same SVG.
+**Font embedding was turned down.** It was on this list as measured but unbuilt. Rendering
+it on a real Windows screen and comparing against DejaVu directly closed it:
+
+- Hangul already lines up. Every Korean system font measured sits at 1.0em, which is what
+  `WIDE_EM` assumes, so the expensive half of embedding buys nothing.
+- `❯ ✓ ✗` are missing from every Windows monospace, but the browser finds them elsewhere
+  and the shapes come out the same as DejaVu's. Nothing looks broken. The slant on `✗` is
+  how U+2717 is drawn, not a fallback artifact.
+- What is left is the 9 percent Consolas looseness, which is real in the numbers and not
+  visible on screen.
+
+The price would have been three to four times the payload: an SVG gzips to under 2 KB and a
+subset adds 4 to 6 KB, base64 being incompressible. Also an OFL reserved-name rename for
+Nanum, and Vercel file tracing for a 2.6 MB font. Do not restart this without a defect that
+someone can actually see.
 
 **Parser errors are English only.** They come out of `src/lib/tape.ts`, which is pure and
 shared with the server route, so localizing them means returning codes and formatting in
@@ -117,5 +131,19 @@ bottom, IBM Plex Mono with Nanum Gothic Coding for Korean. Color carries no hier
 lightness and weight do. The only colored things on the page are the rendered demo and
 the swatches that pick its colors. Keep new UI inside that.
 
-Design exploration lives in `design/` as Claude Design artboards. The seeded canvas
-payload is gitignored since it is a build artifact.
+Design exploration lives in `design/` as Claude Design artboards. **It is gitignored: it
+is local working material, not part of what ships.** It was dropped from the repo because
+all of it is Korean, which breaks the English-only rule above, and because the artboards
+reference a `support.js` that only Claude Design provides, so a stranger who cloned them
+would get blank pages.
+
+What is in there, if you still have the folder:
+
+- `Main.dc.html` is the direction that was chosen. It is already built, in `globals.css`
+  and the components, so the artboard adds nothing the code does not say.
+- Four font candidates: JetBrains Mono, Fira Code, Source Code Pro, Ubuntu Mono. IBM Plex
+  Mono won. The reasoning is in the `canvas.json` annotations.
+- Eight directions that were tried and dropped: Panes, Stage, Teletype, Desk, Inverted,
+  Brutal, Phosphor, Glass.
+- `canvas.json` lays the artboards out on two pages and carries the Korean notes.
+- `termcast-site-directions.html` is the seeded payload, regenerated from the artboards.

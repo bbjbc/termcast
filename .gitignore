@@ -4,5 +4,8 @@ node_modules
 *.tsbuildinfo
 next-env.d.ts
 
-# Seeded design-canvas payload: a build artifact, regenerated from design/*.dc.html
-design/termcast-site-directions.html
+# Design canvas: local working material, not part of what ships. See CLAUDE.md.
+design/
+
+# Scratch output from the browser automation tool
+.playwright-mcp/
