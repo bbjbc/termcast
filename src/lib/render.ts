@@ -1,38 +1,13 @@
-import { type Config, type El, type Palette, THEMES } from './tape';
+import {
+  advanceOf, ellipsize, textWidth,
+  LATIN_EM, WIDE_EM, type Advance,
+} from './metrics';
+import { MIN_COLS, type Config, type El, type Palette, THEMES } from './tape';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/**
- * Terminal cell width. CJK, kana, fullwidth forms and emoji occupy two cells.
- * Counting them as one squashes the glyphs and breaks the grid.
- */
-export function cells(cp: number): 1 | 2 {
-  return (cp >= 0x1100 && cp <= 0x115f) || (cp >= 0x2e80 && cp <= 0x303e)
-    || (cp >= 0x3041 && cp <= 0x33ff) || (cp >= 0x3400 && cp <= 0x4dbf)
-    || (cp >= 0x4e00 && cp <= 0x9fff) || (cp >= 0xa000 && cp <= 0xa4cf)
-    || (cp >= 0xac00 && cp <= 0xd7a3) || (cp >= 0xf900 && cp <= 0xfaff)
-    || (cp >= 0xfe30 && cp <= 0xfe6f) || (cp >= 0xff00 && cp <= 0xff60)
-    || (cp >= 0xffe0 && cp <= 0xffe6) || (cp >= 0x1f300 && cp <= 0x1faff)
-    || (cp >= 0x20000 && cp <= 0x3fffd)
-    ? 2 : 1;
-}
-
-export const cellWidth = (s: string) =>
-  [...s].reduce((w, ch) => w + cells(ch.codePointAt(0)!), 0);
-
-/**
- * Latin monospace advances land near 0.6em: IBM Plex Mono and DejaVu Sans Mono
- * are 0.600 and 0.602, Consolas 0.550.
- *
- * A wide glyph is two cells, but it is not 1.2em. Every CJK font measured puts
- * Hangul at 1.0em (Nanum Gothic Coding, Malgun Gothic) or a little under
- * (Noto Sans KR, 0.92). Reserving 1.2em and pinning it with textLength pushed
- * the leftover 0.2em into the gaps between glyphs, so Korean came out visibly
- * letter-spaced. Advancing wide glyphs by their real width fixes that, and the
- * grid stays deterministic because textLength still pins every run.
- */
-const LATIN_EM = 0.6;
-const WIDE_EM = 1.0;
+// Re-exported because the renderer is where callers expect to find them.
+export { cells, cellWidth } from './metrics';
 
 export function metrics(cfg: Config) {
   const fs = cfg.font;
@@ -46,16 +21,6 @@ export function metrics(cfg: Config) {
     bar: cfg.chrome === 'none' ? 0 : Math.round(fs * 2.6),
   };
 }
-
-type Advance = (ch: string) => number;
-
-/** Horizontal space one character takes, in px. */
-const advanceOf = (cw: number, wide: number): Advance =>
-  (ch) => (cells(ch.codePointAt(0)!) === 2 ? wide : cw);
-
-/** Width of a whole string, in px. */
-const textWidth = (s: string, adv: Advance) =>
-  [...s].reduce((w, ch) => w + adv(ch), 0);
 
 /** Group runs of equal-width characters. An exact width per run keeps the grid. */
 function runs(s: string, adv: Advance): { text: string; x: number; w: number }[] {
@@ -84,12 +49,14 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
 
   const promptGap = (prompt: string) => (prompt ? textWidth(prompt, adv) + cw : 0);
 
-  // Widest line in px, then expressed in columns so `cols` keeps its meaning
+  // Widest line in px, then expressed in columns so `cols` keeps its meaning.
+  // A short tape can measure narrower than a window can usefully be, so the
+  // automatic width takes the same floor an explicit `cols` does.
   const widest = els.reduce((w, e) => Math.max(
     w,
     (e.kind === 'type' ? promptGap(e.prompt) : 0) + textWidth(e.text, adv),
   ), 0);
-  const cols = cfg.cols || Math.ceil(widest / cw) + 2;
+  const cols = cfg.cols || Math.max(MIN_COLS, Math.ceil(widest / cw) + 2);
 
   // rows is a floor, never a ceiling: a static SVG cannot scroll, so clipping
   // content to a set height would silently lose lines.
@@ -166,15 +133,37 @@ export function render(cfg: Config, els: El[], rows: number, total: number): str
     ? `svg{${pal(THEMES.light)}}@media (prefers-color-scheme:dark){svg{${pal(THEMES.dark)}}}`
     : `svg{${pal(THEMES[cfg.theme])}}`;
 
+  const dotR = fs * 0.36;
+  const dotX = (i: number) => Math.round(fs * 1.45) + i * Math.round(fs * 1.2);
+  const dotsEnd = cfg.chrome === 'mac' ? dotX(2) + dotR : 0;
+
+  /**
+   * Centred on the bar, the way a window title sits. The dots and the window
+   * edge come first though: on a narrow window a centred title would run under
+   * the mac buttons and out the far side, so it is trimmed to the space that is
+   * actually free and pushed clear of the dots only when it has to be.
+   */
+  const titleNode = () => {
+    if (!cfg.title) return '';
+    const tf = fs * 0.82;
+    const tadv = advanceOf(tf * LATIN_EM, tf * WIDE_EM);
+    const left = (dotsEnd || padx) + Math.round(tf * 0.8);
+    const right = W - padx;
+    const text = ellipsize(cfg.title, right - left, tadv);
+    if (!text) return '';
+    const half = textWidth(text, tadv) / 2;
+    const x = Math.min(Math.max(W / 2, left + half), right - half);
+    return `<text x="${x.toFixed(1)}" y="${bar / 2 + fs * 0.3}" text-anchor="middle"`
+      + ` fill="var(--ti)" font-size="${tf.toFixed(1)}">${esc(text)}</text>`;
+  };
+
   const chrome = cfg.chrome === 'none' ? '' : [
     `<path d="M.5 ${cfg.radius + .5}A${cfg.radius} ${cfg.radius} 0 0 1 ${cfg.radius + .5}.5h${W - cfg.radius * 2 - 1}a${cfg.radius} ${cfg.radius} 0 0 1 ${cfg.radius} ${cfg.radius}V${bar}H.5Z" fill="var(--bar)"/>`,
     `<line x1="0" y1="${bar}" x2="${W}" y2="${bar}" stroke="var(--bd)"/>`,
     cfg.chrome === 'mac'
-      ? [0, 1, 2].map(i => `<circle cx="${Math.round(fs * 1.45) + i * Math.round(fs * 1.2)}" cy="${bar / 2}" r="${(fs * 0.36).toFixed(1)}" fill="var(--dot)"/>`).join('')
+      ? [0, 1, 2].map(i => `<circle cx="${dotX(i)}" cy="${bar / 2}" r="${dotR.toFixed(1)}" fill="var(--dot)"/>`).join('')
       : '',
-    cfg.title
-      ? `<text x="${W / 2}" y="${bar / 2 + fs * 0.3}" text-anchor="middle" fill="var(--ti)" font-size="${(fs * 0.82).toFixed(1)}">${esc(cfg.title)}</text>`
-      : '',
+    titleNode(),
   ].join('');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,'DejaVu Sans Mono',monospace" font-size="${fs}">

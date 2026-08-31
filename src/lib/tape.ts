@@ -1,4 +1,6 @@
 // Tape grammar: parsing and configuration.
+import { advanceFor, textWidth, wrapText, LATIN_EM } from './metrics';
+
 export type Theme = 'dark' | 'light' | 'auto';
 export type Chrome = 'mac' | 'plain' | 'none';
 
@@ -56,6 +58,13 @@ export type TapeError = { line: number; message: string };
 const COLOR_KEYS = ['bg', 'bar', 'bd', 'dot', 'ti', 'fg', 'dim', 'ok', 'err', 'warn'] as const;
 export const COLORS = COLOR_KEYS;
 
+/**
+ * Narrowest window worth drawing. Below this the mac buttons and a title stop
+ * fitting side by side, and a terminal that holds under twenty characters is not
+ * showing anything anyway. 0 still means "fit the content".
+ */
+export const MIN_COLS = 20;
+
 /** "400" | "400ms" | "1.5s" -> ms */
 export function parseMs(value: string): number {
   const m = value.trim().match(/^([\d.]+)\s*(ms|s)?$/);
@@ -68,6 +77,9 @@ function parseNum(value: string, label: string, min: number, max: number): numbe
   if (!Number.isFinite(n)) throw new Error(`${label} expects a number, got "${value}"`);
   return Math.min(max, Math.max(min, Math.round(n)));
 }
+
+/** 0 keeps the automatic width; any real count is held at MIN_COLS or above. */
+export const floorCols = (n: number) => (n === 0 ? 0 : Math.max(MIN_COLS, n));
 
 function parseColor(value: string, label: string): string {
   const s = value.trim();
@@ -110,7 +122,7 @@ export function parse(src: string): { cfg: Config; cmds: Cmd[]; errors: TapeErro
         case 'loop':   cfg.loop = oneOf(arg, 'loop', ['on', 'off'] as const) === 'on'; break;
         case 'hold':   cfg.hold = parseMs(arg); break;
         case 'font':   cfg.font = parseNum(arg, 'font', 8, 32); break;
-        case 'cols':   cfg.cols = parseNum(arg, 'cols', 0, 200); break;
+        case 'cols':   cfg.cols = floorCols(parseNum(arg, 'cols', 0, 200)); break;
         case 'rows':   cfg.rows = parseNum(arg, 'rows', 0, 80); break;
         case 'radius': cfg.radius = parseNum(arg, 'radius', 0, 24); break;
 
@@ -168,20 +180,47 @@ export function build(cfg: Config, cmds: Cmd[]): { els: El[]; rows: number; tota
   let speed = cfg.speed;
   let prompt = cfg.prompt;
 
+  // A window of a fixed width behaves like a terminal: what does not fit the
+  // line carries on to the next one. An automatic width grows to the content
+  // instead, so there is nothing to wrap against.
+  const adv = advanceFor(cfg.font);
+  const cw = cfg.font * LATIN_EM;
+  const limit = cfg.cols * cw;
+  const split = (text: string, indent: number) =>
+    (limit ? wrapText(text, adv, (r) => (r === 0 ? limit - indent : limit)) : [text]);
+
   for (const c of cmds) {
     switch (c.cmd) {
       case 'wait':   t += c.value; break;
       case 'speed':  speed = c.value; break;
       case 'prompt': prompt = c.text; break;
-      case 'type':
-        els.push({ kind: 'type', text: c.text, prompt, row, t0: t, speed });
-        t += c.text.length * speed;
-        row += 1;
+      case 'type': {
+        // Typing runs straight through the wrap, so each row starts where the
+        // previous one left off and the cursor lands on the row being typed.
+        const parts = split(c.text, prompt ? textWidth(prompt, adv) + cw : 0);
+        let typed = 0;
+        for (const [k, part] of parts.entries()) {
+          els.push({
+            kind: 'type',
+            text: part,
+            prompt: k === 0 ? prompt : '',   // the wrap continues at column 0
+            row,
+            t0: t + typed * speed,
+            speed,
+          });
+          typed += [...part].length;
+          row += 1;
+        }
+        t += typed * speed;
         break;
+      }
       case 'out': case 'dim': case 'ok': case 'err': case 'warn':
-        els.push({ kind: 'out', text: c.text, row, t0: t, tone: c.cmd });
+        // A printed line arrives whole, wrapped rows included
+        for (const part of split(c.text, 0)) {
+          els.push({ kind: 'out', text: part, row, t0: t, tone: c.cmd });
+          row += 1;
+        }
         t += 60;
-        row += 1;
         break;
     }
   }

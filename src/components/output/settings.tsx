@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { useI18n } from '@/components/i18n';
 import { Segmented, Slider } from '@/components/ui/controls';
 import { fmt } from '@/lib/i18n';
-import { THEMES, type Config, type Palette } from '@/lib/tapecast';
+import { MIN_COLS, THEMES, type Config, type Palette } from '@/lib/tapecast';
 
 import s from './output.module.css';
 
@@ -90,12 +90,14 @@ export function Settings({ cfg, onPatch }: { cfg: Config; onPatch: Patch }) {
           />
         </Field>
 
-        {/* cols and rows size the window the way a terminal is sized: 80 x 24 */}
+        {/* cols and rows size the window the way a terminal is sized: 80 x 24.
+            The notch below MIN_COLS is auto, so the track runs straight from
+            "fit the content" into the narrowest window worth drawing. */}
         <Field label={t.field.width}>
           <Slider
-            label={t.field.width} value={cfg.cols} min={0} max={120}
-            format={(v) => (v === 0 ? t.value.auto : fmt(t.value.cols, { n: v }))}
-            onChange={(v) => onPatch('cols', v === 0 ? null : String(v))}
+            label={t.field.width} value={cfg.cols || MIN_COLS - 1} min={MIN_COLS - 1} max={120}
+            format={(v) => (v < MIN_COLS ? t.value.auto : fmt(t.value.cols, { n: v }))}
+            onChange={(v) => onPatch('cols', v < MIN_COLS ? null : String(v))}
           />
         </Field>
 

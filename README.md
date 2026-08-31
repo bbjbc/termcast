@@ -92,7 +92,7 @@ type
 | `theme` | `dark` | `dark` · `light` · `auto` |
 | `chrome` | `mac` | `mac` · `plain` · `none` |
 | `font` | `14` | font size in px |
-| `cols` | `0` | width in columns, 0 fits the content |
+| `cols` | `0` | width in columns, 20 to 200, 0 fits the content |
 | `rows` | `0` | minimum height in lines, 0 fits the content |
 | `radius` | `9` | corner radius in px |
 | `loop` | `on` | `on` · `off` |
@@ -105,7 +105,9 @@ A few things worth knowing:
   install can crawl while a build log flies past.
 - **`cols` and `rows` size the window the way a terminal is sized,** in characters and lines.
   `cols 80` and `rows 24` gives you the classic one. `rows` is a floor, not a ceiling: a static
-  SVG cannot scroll, so longer output grows the window rather than losing lines.
+  SVG cannot scroll, so longer output grows the window rather than losing lines. `cols` is a
+  ceiling: a line past it wraps onto the next one, at the character, the way a terminal does.
+  With `cols 0` the window grows to the content instead and nothing wraps.
 - **Quote to keep leading spaces:** `out "    nested.txt"`
 
 ### CJK
