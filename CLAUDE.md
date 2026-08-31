@@ -4,7 +4,7 @@ Terminal demos as animated SVG. You write a tape, the renderer turns it into an 
 you can drop into a README.
 
 - Live: https://termcast.xyz
-- Repo: https://github.com/bbjbc/termcast (private)
+- Repo: https://github.com/bbjbc/termcast (public, MIT)
 - Editor pages: `/en`, `/ko`. Bare `/` redirects by `Accept-Language`.
 - SVG endpoint: `/t/v<n>/<code>.svg`, where `<code>` is the deflated tape and `<n>` is
   `RENDERER_VERSION`. `/t/<code>.svg` still resolves, for addresses that predate it.
@@ -34,7 +34,8 @@ Nothing is queued. Pick from "Open problems".
   metadata. Use a colon, comma, or period.
 - **Everything shipped is English.** UI strings, code comments, parser errors, README.
   Korean lives only in `README.ko.md` and the `ko` dictionary.
-- The user writes and reads Korean, so talk to them in Korean. The artifacts stay English.
+- The maintainer reads and writes Korean, so a session with them runs in Korean. What the
+  repo ships stays English, per the rule above.
 - **Commit subjects take a Conventional Commits prefix:** `feat:`, `fix:`, `docs:`,
   `chore:`, `refactor:`, `test:`. Lowercase after the colon, imperative, no trailing
   period. The body stays prose: say what was wrong and why this is the fix, not a

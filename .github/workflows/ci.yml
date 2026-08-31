@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to the same branch makes the first run pointless, so drop it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # packageManager in package.json pins the version, so this needs no input
+      - uses: pnpm/action-setup@v4
+
+      # Pinned rather than read from engines, which is a range: CI should not
+      # change what it runs on because a new major was released.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      # The coverage gate fails the run under 100 percent, so this is the test step
+      - run: pnpm coverage
+
+      - run: pnpm build

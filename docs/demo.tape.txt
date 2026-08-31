@@ -1,0 +1,11 @@
+title  termcast
+prompt ❯
+speed  55ms
+hold   1.6s
+font   14
+
+type  npx termcast tape.tape
+wait  400ms
+ok    ✓ rendered 7 lines in 0.1s
+dim   → demo.svg  9.4 kB
+type

@@ -2,6 +2,20 @@
   "name": "termcast",
   "version": "0.1.0",
   "private": true,
+  "description": "Terminal demos as animated SVG. Write a tape, get a README-ready demo.",
+  "license": "MIT",
+  "homepage": "https://www.termcast.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bbjbc/termcast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bbjbc/termcast/issues"
+  },
+  "packageManager": "pnpm@10.16.1",
+  "engines": {
+    "node": ">=20.9"
+  },
   "scripts": {
     "dev": "next dev --turbopack -H 0.0.0.0 -p 3210",
     "build": "next build",
