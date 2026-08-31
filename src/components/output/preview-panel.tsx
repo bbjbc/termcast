@@ -5,27 +5,27 @@ import { useState } from 'react';
 import { useI18n } from '@/components/i18n';
 import { QuietButton } from '@/components/ui/controls';
 import { Panel } from '@/components/ui/panel';
-import type { Config } from '@/lib/tapecast';
 
 import { ExportBar } from './export-bar';
 import { PreviewStage } from './preview-stage';
-import { Settings } from './settings';
 
-type OutputPanelProps = {
+type PreviewPanelProps = {
   svg: string;
   dataUrl: string;
   width: number;
-  cfg: Config;
   url: string;
   tooLong: boolean;
   pending: boolean;
-  onPatch: (key: string, value: string | null) => void;
   className?: string;
 };
 
-export function OutputPanel({
-  svg, dataUrl, width, cfg, url, tooLong, pending, onPatch, className,
-}: OutputPanelProps) {
+/**
+ * The centre column: the demo itself, and the two ways to take it away.
+ * Settings live in their own panel beside this one, so the stage keeps the space.
+ */
+export function PreviewPanel({
+  svg, dataUrl, width, url, tooLong, pending, className,
+}: PreviewPanelProps) {
   const { t } = useI18n();
   const [replay, setReplay] = useState(0);
 
@@ -47,8 +47,7 @@ export function OutputPanel({
         </QuietButton>
       }
     >
-      <PreviewStage src={dataUrl} replayKey={replay} />
-      <Settings cfg={cfg} onPatch={onPatch} />
+      <PreviewStage src={dataUrl} width={width} replayKey={replay} />
       <ExportBar svg={svg} url={url} width={width} tooLong={tooLong} pending={pending} />
     </Panel>
   );

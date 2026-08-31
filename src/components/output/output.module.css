@@ -1,34 +1,39 @@
 /* -- preview stage ---------------------------------------- */
-/* The stage absorbs whatever space is left and scales the demo down to fit, so a
-   tall `rows` setting can never squeeze the controls out of the panel. */
+/* The stage is the centre column, so it takes the whole panel above the export
+   bar and scales the demo down to fit whatever is left. */
 .stage {
   display: grid;
   /* minmax(0, 1fr) plus a zero flex-basis breaks the circle where the stage is
      sized by the image and the image is sized by the stage. Without it the demo
-     never scales down and pushes the controls off the panel. */
+     never scales down and pushes the export bar off the panel. */
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: minmax(0, 1fr);
   place-items: center;
-  padding: 22px 20px;
-  border-bottom: 1px solid var(--hair);
-  /* 3:2 against the settings below. Fixed shares beat content-driven sizing here:
-     the panel then looks the same whatever the tape says. */
-  flex: 3 1 0;
+  padding: 26px 24px;
+  flex: 1 1 0;
   min-height: 190px;
   overflow: hidden;
 }
 
-.stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+/* Fills the stage the way an artboard fills a canvas, scaling either way and
+   keeping the aspect. Capped above its natural size by the inline max-width the
+   stage sets, so a small demo is never blown up past recognition. */
+.stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
 
 /* -- settings --------------------------------------------- */
+/* One column: this is a narrow rail now, not a wide tray under the demo. */
 .settings {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(302px, 1fr));
-  align-items: start;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
-  padding: 16px 20px;
-  flex: 2 1 0;
-  min-height: 170px;
+  padding: 16px;
+  flex-grow: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -55,10 +60,23 @@
 
 .wide { grid-column: 1 / -1; }
 
+/* Stacked under the demo on a phone: the rail is now full width, so the groups
+   run across instead of into one long scroll. */
+@media (max-width: 1100px) {
+  .settings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    align-items: start;
+  }
+}
+
+/* Wraps rather than overflows: on a narrow rail a control that cannot fit
+   beside its label drops under it instead of spilling out of the group. */
 .field {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px 12px;
+  flex-wrap: wrap;
   min-height: 22px;
 }
 

@@ -1,7 +1,9 @@
 .editor {
   display: flex;
   flex-grow: 1;
-  min-height: 0;
+  /* A floor, so a tape full of errors can never push what you are typing
+     out of the panel. The error list scrolls instead. */
+  min-height: 168px;
 }
 
 /* -- line-number gutter ----------------------------------- */
@@ -102,13 +104,25 @@
 .input::selection { background: var(--edge); color: transparent; }
 
 /* -- presets ---------------------------------------------- */
-.presets { display: flex; gap: 4px; flex-wrap: wrap; }
+.presets {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--hair);
+}
 
 /* -- errors ----------------------------------------------- */
+/* Capped at a third of the panel and scrollable past that. Every error still
+   reachable, and the editor keeps two thirds whatever the count. */
 .errors {
   padding: 9px 12px;
   border-top: 1px solid var(--line);
   flex-shrink: 0;
+  min-height: 54px;
+  max-height: 34%;
+  overflow-y: auto;
 }
 
 .errors p {

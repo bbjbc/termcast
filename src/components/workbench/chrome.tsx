@@ -32,6 +32,7 @@ export function StatusBar({
             key={code}
             className={s.lang}
             data-on={code === locale}
+            aria-current={code === locale ? 'true' : undefined}
             href={`/${code}${tapeCode ? `?tape=${tapeCode}` : ''}`}
             hrefLang={code}
           >
@@ -50,7 +51,7 @@ export function ModeLine({ file, line }: { file: string; line: number }) {
       <div className={s.mode}>NORMAL</div>
       <div className={s.file}>{file}</div>
       <div className={s.gap} />
-      <div className={s.modeMeta}>utf-8</div>
+      <div className={`${s.modeMeta} ${s.encoding}`}>utf-8</div>
       <div className={s.modeMeta}>{line}:1</div>
     </div>
   );

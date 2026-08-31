@@ -15,7 +15,7 @@ export type Dict = {
   meta: { title: string; description: string };
   tagline: { lead: string; strong: string };
   status: { lines: string; switchLanguage: string };
-  panel: { tape: string; output: string };
+  panel: { tape: string; output: string; settings: string };
   preview: { alt: string; replay: string; replayTitle: string };
   tape: { aria: string; errorLine: string };
   hint: { type: string; out: string; dim: string; ok: string; err: string; warn: string; wait: string };
@@ -42,7 +42,7 @@ const en: Dict = {
   },
   tagline: { lead: 'Terminal demos as animated SVG.', strong: 'A 3 MB GIF becomes 6 KB.' },
   status: { lines: 'lines', switchLanguage: 'Switch language' },
-  panel: { tape: 'tape', output: 'output' },
+  panel: { tape: 'tape', output: 'output', settings: 'settings' },
   preview: { alt: 'Terminal demo preview', replay: 'Replay', replayTitle: 'Play from the start' },
   tape: { aria: 'Tape', errorLine: 'line {n}' },
   hint: {
@@ -80,7 +80,7 @@ const ko: Dict = {
   },
   tagline: { lead: '터미널 데모를 애니메이션 SVG로.', strong: 'GIF 3 MB가 6 KB가 됩니다.' },
   status: { lines: '줄', switchLanguage: '언어 바꾸기' },
-  panel: { tape: '대본', output: '결과' },
+  panel: { tape: '대본', output: '결과', settings: '설정' },
   preview: { alt: '터미널 데모 미리보기', replay: '다시 재생', replayTitle: '처음부터 다시 재생' },
   tape: { aria: '대본', errorLine: '{n}행' },
   hint: {

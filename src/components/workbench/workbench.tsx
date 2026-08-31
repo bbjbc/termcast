@@ -1,6 +1,7 @@
 'use client';
 
-import { OutputPanel } from '@/components/output/output-panel';
+import { PreviewPanel } from '@/components/output/preview-panel';
+import { SettingsPanel } from '@/components/output/settings-panel';
 import { TapePanel } from '@/components/tape/tape-panel';
 import { useTape } from '@/hooks/use-tape';
 import { useTapeUrl } from '@/hooks/use-tape-url';
@@ -33,18 +34,18 @@ export function Workbench({ initialTape }: { initialTape: string }) {
       <main className={s.main}>
         <Wordmark />
 
+        {/* Script left, demo centre, settings right: you work in the middle. */}
         <div className={s.cols}>
           <TapePanel source={tape.source} errors={tape.errors} onChange={tape.load} />
-          <OutputPanel
+          <PreviewPanel
             svg={tape.svg}
             dataUrl={tape.dataUrl}
             width={tape.width}
-            cfg={tape.cfg}
             url={link.url}
             tooLong={link.tooLong}
             pending={link.pending}
-            onPatch={tape.patch}
           />
+          <SettingsPanel cfg={tape.cfg} onPatch={tape.patch} />
         </div>
       </main>
 

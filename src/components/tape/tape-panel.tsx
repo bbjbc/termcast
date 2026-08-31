@@ -24,20 +24,6 @@ export function TapePanel({ source, errors, onChange, className }: TapePanelProp
     <Panel
       label={t.panel.tape}
       className={className}
-      action={
-        <div className={s.presets}>
-          {presets.map((preset) => (
-            <Chip
-              key={preset.name}
-              title={preset.hint}
-              on={preset === active}
-              onClick={() => onChange(preset.tape)}
-            >
-              {preset.name}
-            </Chip>
-          ))}
-        </div>
-      }
       footer={
         <div className={s.hint}>
           <span><b>type</b> {t.hint.type}</span>
@@ -50,6 +36,21 @@ export function TapePanel({ source, errors, onChange, className }: TapePanelProp
         </div>
       }
     >
+      {/* A strip of its own rather than a header action: six names do not fit
+          beside the label, and wrapping them there reads as a broken header. */}
+      <div className={s.presets}>
+        {presets.map((preset) => (
+          <Chip
+            key={preset.name}
+            title={preset.hint}
+            on={preset === active}
+            onClick={() => onChange(preset.tape)}
+          >
+            {preset.name}
+          </Chip>
+        ))}
+      </div>
+
       <TapeEditor value={source} onChange={onChange} />
 
       {errors.length > 0 && (

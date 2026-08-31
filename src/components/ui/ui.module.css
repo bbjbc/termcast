@@ -8,21 +8,27 @@
   background: var(--panel);
 }
 
+/* A set height rather than padding around the content: a panel whose header
+   carries a button would otherwise sit taller than the ones that do not, and
+   the three panels stand side by side. */
 .head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 9px 12px;
+  min-height: 42px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 
 .label {
+  flex-shrink: 0;
   color: var(--dim);
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .body {
