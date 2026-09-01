@@ -84,15 +84,26 @@ export function embedPicture(
 ): string {
   const hi = colsIn(WIDEST, font);
   // Every floor is at most WIDEST, so a band's lo never crosses hi.
-  const src = (lo: number) =>
-    `${origin}/t/v${RENDERER_VERSION}/w${lo}-${hi}/${code}.svg`;
+  return assemble(embedBands(font, rows).map(([viewport, lo]) => ({
+    viewport,
+    src: `${origin}/t/v${RENDERER_VERSION}/w${lo}-${hi}/${code}.svg`,
+  })));
+}
 
-  // Walk narrowest first, the base included. Absorbing a band into the group
-  // below hands the group the narrower of the two floors, because the group's
-  // one variant now has to survive both stretches; that is only free when the
-  // tape takes the same rows at the narrower floor, the group's and the
-  // band's own. The floors zigzag (the sidebar takes the column back down at
-  // 768), so the minimum is taken rather than assumed.
+/**
+ * The viewport classes this tape can actually tell apart, narrowest first,
+ * each with the columns its variant reflows down to.
+ *
+ * Walks narrowest first, the base included. Absorbing a band into the group
+ * below hands the group the narrower of the two floors, because the group's
+ * one variant now has to survive both stretches; that is only free when the
+ * tape takes the same rows at the narrower floor, the group's and the band's
+ * own. The floors zigzag (the sidebar takes the column back down at 768), so
+ * the minimum is taken rather than assumed.
+ */
+export function embedBands(
+  font: number, rows: (cols: number) => number,
+): [viewport: number, lo: number][] {
   const all: [viewport: number, floor: number][] = [[0, NARROWEST], ...[...BANDS].reverse()];
   const kept: [viewport: number, lo: number][] = [];
   for (const [viewport, floor] of all) {
@@ -107,15 +118,41 @@ export function embedPicture(
     }
     kept.push([viewport, lo]);
   }
+  return kept;
+}
 
-  const [, base] = kept[0];
-  const img = `<img src="${src(base)}" width="100%" alt="demo">`;
-  if (kept.length === 1) return img;
+/** Variants to markup: an img when one is all there is, a picture otherwise. */
+function assemble(variants: { viewport: number; src: string }[]): string {
+  const img = `<img src="${variants[0].src}" width="100%" alt="demo">`;
+  if (variants.length === 1) return img;
   return [
     '<picture>',
-    ...kept.slice(1).reverse().map(([viewport, lo]) =>
-      `  <source media="(min-width: ${viewport}px)" srcset="${src(lo)}">`),
+    ...variants.slice(1).reverse().map((v) =>
+      `  <source media="(min-width: ${v.viewport}px)" srcset="${v.src}">`),
     `  ${img}`,
     '</picture>',
   ].join('\n');
+}
+
+/**
+ * The committed form of the same embed: files that live in the repo instead
+ * of addresses that lean on the service. Short paths in the README, and the
+ * demo keeps working with nothing behind it. The names carry the viewport the
+ * variant serves, so a re-download after editing the tape lands on the same
+ * names and the README needs no touch.
+ */
+export function embedFiles(
+  font: number, rows: (cols: number) => number,
+): { name: string; viewport: number; cols: [number, number] }[] {
+  const hi = colsIn(WIDEST, font);
+  return embedBands(font, rows).map(([viewport, lo]) => ({
+    name: viewport ? `demo-${viewport}.svg` : 'demo.svg',
+    viewport,
+    cols: [lo, hi],
+  }));
+}
+
+/** The README block a committed file set is used through. */
+export function embedFilesSnippet(files: { name: string; viewport: number }[]): string {
+  return assemble(files.map((f) => ({ viewport: f.viewport, src: `docs/${f.name}` })));
 }

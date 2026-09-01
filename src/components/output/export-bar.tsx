@@ -8,21 +8,33 @@ import { useCopy } from '@/hooks/use-copy';
 
 import s from './output.module.css';
 
+type FileSet = { snippet: string; render: () => { name: string; svg: string }[] };
+
 type ExportBarProps = {
   svg: string;
   snippet: string;
   picture: string;
+  fileSet: FileSet | null;
   tooLong: boolean;
   pending: boolean;
 };
 
-export function ExportBar({ svg, snippet, picture, tooLong, pending }: ExportBarProps) {
+const save = (name: string, svg: string) => {
+  const href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  const a = document.createElement('a');
+  a.href = href;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(href), 1000);
+};
+
+export function ExportBar({ svg, snippet, picture, fileSet, tooLong, pending }: ExportBarProps) {
   const { t } = useI18n();
   const { copied, copy } = useCopy();
-  // Two things can be copied, so remember which one the confirmation is for.
-  const [which, setWhich] = useState<'github' | 'plain'>('github');
+  // Three things can be copied, so remember which one the confirmation is for.
+  const [which, setWhich] = useState<'github' | 'plain' | 'files'>('github');
 
-  const grab = useCallback((text: string, kind: 'github' | 'plain') => {
+  const grab = useCallback((text: string, kind: 'github' | 'plain' | 'files') => {
     setWhich(kind);
     copy(text);
   }, [copy]);
@@ -35,14 +47,13 @@ export function ExportBar({ svg, snippet, picture, tooLong, pending }: ExportBar
     ? `${t.exportBar.pictureComment}\n${picture}`
     : picture;
 
-  const download = useCallback(() => {
-    const href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
-    const a = document.createElement('a');
-    a.href = href;
-    a.download = 'demo.svg';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(href), 1000);
-  }, [svg]);
+  // The committed form: the variants download as files for the repo, and the
+  // copied block leads with how to place them.
+  const grabFiles = useCallback(() => {
+    if (!fileSet) return;
+    fileSet.render().forEach((f, i) => setTimeout(() => save(f.name, f.svg), i * 300));
+    grab(`${t.exportBar.filesComment}\n${fileSet.snippet}`, 'files');
+  }, [fileSet, grab, t]);
 
   return (
     <div className={s.export}>
@@ -59,7 +70,10 @@ export function ExportBar({ svg, snippet, picture, tooLong, pending }: ExportBar
         <Button disabled={!snippet} onClick={() => grab(snippet, 'plain')}>
           {copied && which === 'plain' ? t.exportBar.copied : t.exportBar.copyPlain}
         </Button>
-        <Button onClick={download}>{t.exportBar.download}</Button>
+        <Button disabled={!fileSet} onClick={grabFiles}>
+          {copied && which === 'files' ? t.exportBar.filesDone : t.exportBar.files}
+        </Button>
+        <Button onClick={() => save('demo.svg', svg)}>{t.exportBar.download}</Button>
       </div>
 
       <p className={s.note}>{t.exportBar.note}</p>

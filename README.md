@@ -56,7 +56,9 @@ reserves the height of its narrowest wrap; the picture keys the reserve on the s
 instead, so a desktop is not paying for a phone. Every variant still reflows, which is why
 a mispredicted breakpoint costs a couple of blank rows and never a character. The block
 only grows as long as the tape needs: bands that would reserve the same height collapse,
-and a tape without wrapping lines stays a single line.
+and a tape without wrapping lines stays a single line. **Download file set** is the same
+thing as files: commit them to docs/ in your repo, paste the short block it copies, and
+nothing depends on this service.
 
 Or use **Download SVG** and commit the file, which works with no service behind it.
 

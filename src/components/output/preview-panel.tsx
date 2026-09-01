@@ -15,6 +15,7 @@ type PreviewPanelProps = {
   width: number;
   snippet: string;
   picture: string;
+  fileSet: { snippet: string; render: () => { name: string; svg: string }[] } | null;
   tooLong: boolean;
   pending: boolean;
   className?: string;
@@ -25,7 +26,7 @@ type PreviewPanelProps = {
  * Settings live in their own panel beside this one, so the stage keeps the space.
  */
 export function PreviewPanel({
-  svg, dataUrl, width, snippet, picture, tooLong, pending, className,
+  svg, dataUrl, width, snippet, picture, fileSet, tooLong, pending, className,
 }: PreviewPanelProps) {
   const { t } = useI18n();
   const [replay, setReplay] = useState(0);
@@ -49,7 +50,7 @@ export function PreviewPanel({
       }
     >
       <PreviewStage src={dataUrl} width={width} replayKey={replay} />
-      <ExportBar svg={svg} snippet={snippet} picture={picture} tooLong={tooLong} pending={pending} />
+      <ExportBar svg={svg} snippet={snippet} picture={picture} fileSet={fileSet} tooLong={tooLong} pending={pending} />
     </Panel>
   );
 }

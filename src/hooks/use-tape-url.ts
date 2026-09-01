@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { embedPicture, embedSnippet } from '@/lib/embed';
+import { embedFiles, embedFilesSnippet, embedPicture, embedSnippet } from '@/lib/embed';
 import { MAX_CODE, encodeTape } from '@/lib/encode';
-import { RENDERER_VERSION, build, parse } from '@/lib/tapecast';
+import { RENDERER_VERSION, build, parse, tapeToSvg } from '@/lib/tapecast';
 
 const subscribe = () => () => {};
 
@@ -37,15 +37,25 @@ export function useTapeUrl(source: string, font: number) {
 
   // What goes in a GitHub README is a `<picture>` of one variant per viewport
   // class, so the reserved height follows the screen; the one-line `<img>`
-  // reflows the same way and is the safe form for anywhere else. The picture
-  // asks how many rows the tape takes at a width, so bands that reserve the
-  // same height collapse and a tape that never wraps stays one line.
+  // reflows the same way and is the safe form for anywhere else. Both the
+  // pasted form and the committed one ask how many rows the tape takes at a
+  // width, so bands that reserve the same height collapse and a tape that
+  // never wraps stays a single image.
   const snippet = url ? embedSnippet(origin, code, font) : '';
-  const picture = url ? (() => {
+  const { picture, fileSet } = (() => {
+    if (!url) return { picture: '', fileSet: null };
     const { cfg, cmds } = parse(source);
-    return embedPicture(origin, code, font, (cols) =>
-      Math.max(build({ ...cfg, cols }, cmds).rows, cfg.rows));
-  })() : '';
+    const rows = (cols: number) => Math.max(build({ ...cfg, cols }, cmds).rows, cfg.rows);
+    const files = embedFiles(font, rows);
+    return {
+      picture: embedPicture(origin, code, font, rows),
+      // The SVGs render on demand: a download is a click, not a keystroke.
+      fileSet: {
+        snippet: embedFilesSnippet(files),
+        render: () => files.map((f) => ({ name: f.name, svg: tapeToSvg(source, { cols: f.cols }).svg })),
+      },
+    };
+  })();
 
-  return { code, url, snippet, picture, tooLong, pending: !code && !tooLong };
+  return { code, url, snippet, picture, fileSet, tooLong, pending: !code && !tooLong };
 }

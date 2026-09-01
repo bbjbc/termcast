@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { colsIn, embedPicture, embedRange, embedSnippet } from '@/lib/embed';
+import { colsIn, embedFiles, embedFilesSnippet, embedPicture, embedRange, embedSnippet } from '@/lib/embed';
 import { MAX_COLS, MIN_COLS } from '@/lib/tape';
 import { RENDERER_VERSION } from '@/lib/tapecast';
 
@@ -102,5 +102,34 @@ describe('embedPicture', () => {
   it('collapses to the one-line img when the tape never wraps', () => {
     const flat = embedPicture('https://x.dev', 'CODE', 14, () => 5);
     expect(flat).toBe(`<img src="https://x.dev/t/v${RENDERER_VERSION}/w22-94/CODE.svg" width="100%" alt="demo">`);
+  });
+});
+
+describe('embedFiles', () => {
+  const steep = (cols: number) => Math.ceil(200 / cols);
+
+  it('names each file for the viewport it serves, base first', () => {
+    const files = embedFiles(14, steep);
+    expect(files[0]).toEqual({ name: 'demo.svg', viewport: 0, cols: [22, 94] });
+    expect(files.map((f) => f.name)).toEqual(
+      ['demo.svg', 'demo-375.svg', 'demo-500.svg', 'demo-600.svg', 'demo-768.svg', 'demo-1012.svg', 'demo-1280.svg'],
+    );
+    for (const f of files) expect(f.cols[1]).toBe(94);
+  });
+
+  it('shrinks with the tape the way the pasted form does', () => {
+    expect(embedFiles(14, () => 5)).toHaveLength(1);
+  });
+
+  it('writes the block with repo paths instead of addresses', () => {
+    const block = embedFilesSnippet(embedFiles(14, steep));
+    expect(block).toContain('srcset="docs/demo-1280.svg"');
+    expect(block).toContain('<img src="docs/demo.svg" width="100%" alt="demo">');
+    expect(block).not.toContain('https://');
+  });
+
+  it('writes a single img for a single file', () => {
+    expect(embedFilesSnippet(embedFiles(14, () => 5)))
+      .toBe('<img src="docs/demo.svg" width="100%" alt="demo">');
   });
 });

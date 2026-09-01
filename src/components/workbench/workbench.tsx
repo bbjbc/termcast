@@ -43,6 +43,7 @@ export function Workbench({ initialTape }: { initialTape: string }) {
             width={tape.width}
             snippet={link.snippet}
             picture={link.picture}
+            fileSet={link.fileSet}
             tooLong={link.tooLong}
             pending={link.pending}
           />

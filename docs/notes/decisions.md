@@ -103,6 +103,14 @@ column on a wide viewport would pick a variant wrapped too wide for its box. The
 inside the picture is that same one-liner, which is also what a sanitizer that strips
 `<source>` leaves standing.
 
+The same bands come in a committed form: **Download file set** saves one SVG per band,
+named for the viewport it serves, and copies a block of short repo paths under docs/. It
+is the picture for people who mind six-hundred-character addresses in their README source,
+it works with nothing behind it the way the plain download always has, and re-downloading
+after editing the tape lands on the same file names so the README needs no touch. Both
+copied forms lead with an HTML comment in the editor's language, invisible when rendered,
+saying why the block is shaped the way it is and where to put the files.
+
 What no markup can remove: the reserve inside a band (a couple of rows at worst, the gap
 between the band's floor and the box it actually got) and the line-box descender every
 inline image on GitHub sits on. Measured flat against a GitHub-like page, the multi-line
