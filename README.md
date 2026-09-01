@@ -50,13 +50,16 @@ break where they meet the padding, and the demo needs no `<picture>` and no seco
 
 `width="100%"` is doing work there. Without it the image falls back to 300px.
 
-The editor's **Copy for GitHub** wraps that line in a `<picture>` with one variant per
-viewport class. An `<img>` box cannot give its spare height back, so the one-liner always
+**Copy for Markdown** wraps that line in a `<picture>` with one variant per viewport
+class. An `<img>` box cannot give its spare height back, so a single address always
 reserves the height of its narrowest wrap; the picture keys the reserve on the screen
 instead, so a desktop is not paying for a phone. Every variant still reflows, which is why
-a mispredicted breakpoint costs a couple of blank rows and never a character.
+a mispredicted breakpoint costs a couple of blank rows and never a character, and the
+block only grows as long as the tape needs: bands that would reserve the same height
+collapse, and a tape without wrapping lines stays a single line.
 
-Or use **Download SVG** and commit the file, which works with no service behind it.
+Or use **Download SVG** and commit the file: one fixed-width image, no blank space under
+it, and it works anywhere with no service behind it.
 
 ```bash
 git clone https://github.com/bbjbc/termcast

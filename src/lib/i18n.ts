@@ -31,7 +31,8 @@ export type Dict = {
     bg: string; bar: string; bd: string; dot: string; ti: string;
   };
   exportBar: {
-    tooLong: string; building: string; copy: string; copyPlain: string; copied: string; download: string; note: string;
+    tooLong: string; building: string; copy: string; copied: string; download: string; note: string;
+    pictureComment: string;
   };
 };
 
@@ -66,11 +67,11 @@ const en: Dict = {
   exportBar: {
     tooLong: 'This tape is too long for a URL. Download the SVG and commit it to your repo.',
     building: 'building the URL…',
-    copy: 'Copy for GitHub',
-    copyPlain: 'Copy plain <img>',
+    copy: 'Copy for Markdown',
     copied: 'Copied',
     download: 'Download SVG',
-    note: 'The GitHub copy trims the blank space under the demo per screen size; the plain one is a single line for anywhere else. Keep the downloaded file in your repo and it outlives this service.',
+    note: 'The copy fits the demo to every screen width with almost no blank space under it. The download is one fixed-width file: it behaves like any image, works anywhere, and kept in your repo it outlives this service.',
+    pictureComment: '<!-- One demo per screen width, so no blank space is reserved below it; the browser downloads exactly one. Made with termcast: https://termcast.xyz -->',
   },
 };
 
@@ -105,11 +106,11 @@ const ko: Dict = {
   exportBar: {
     tooLong: '대본이 길어 주소 한도를 넘었습니다. SVG를 받아 레포에 넣어주세요.',
     building: '주소를 만드는 중…',
-    copy: 'GitHub용 복사',
-    copyPlain: '한 줄 <img> 복사',
+    copy: 'Markdown용 복사',
     copied: '복사했습니다',
     download: 'SVG 다운로드',
-    note: 'GitHub용은 화면 폭별로 데모 아래 빈 공간까지 줄여 주고, 한 줄 <img>는 어디에나 붙는 범용입니다. 받은 파일을 레포에 두면 이 서비스와 무관하게 영구히 남습니다.',
+    note: '복사는 화면 폭마다 데모를 맞춰 아래에 빈 공간을 거의 남기지 않습니다. 다운로드는 고정 폭 한 장이라 여느 이미지처럼 어디에나 쓸 수 있고, 레포에 두면 이 서비스와 무관하게 영구히 남습니다.',
+    pictureComment: '<!-- 화면 폭별 데모를 담아 아래에 빈 공간이 남지 않게 한 것으로, 브라우저는 이 중 하나만 내려받습니다. termcast로 만들었습니다: https://termcast.xyz -->',
   },
 };
 

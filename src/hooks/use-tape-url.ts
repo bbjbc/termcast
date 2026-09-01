@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { embedPicture, embedSnippet } from '@/lib/embed';
+import { embedPicture } from '@/lib/embed';
 import { MAX_CODE, encodeTape } from '@/lib/encode';
-import { RENDERER_VERSION } from '@/lib/tapecast';
+import { RENDERER_VERSION, build, parse } from '@/lib/tapecast';
 
 const subscribe = () => () => {};
 
@@ -35,11 +35,15 @@ export function useTapeUrl(source: string, font: number) {
     ? `${origin}/t/v${RENDERER_VERSION}/${code}.svg`
     : '';
 
-  // What goes in a GitHub README is a `<picture>` of one variant per viewport
-  // class, so the reserved height follows the screen; the one-line `<img>`
-  // reflows the same way and is the safe form for anywhere else.
-  const snippet = url ? embedSnippet(origin, code, font) : '';
-  const picture = url ? embedPicture(origin, code, font) : '';
+  // What goes in a README is a `<picture>` of one variant per viewport class,
+  // so the reserved height follows the screen. It asks how many rows the tape
+  // takes at a width; bands that reserve the same height collapse, and a tape
+  // that never wraps stays a single img line.
+  const picture = url ? (() => {
+    const { cfg, cmds } = parse(source);
+    const rows = (cols: number) => Math.max(build({ ...cfg, cols }, cmds).rows, cfg.rows);
+    return embedPicture(origin, code, font, rows, cfg.title);
+  })() : '';
 
-  return { code, url, snippet, picture, tooLong, pending: !code && !tooLong };
+  return { code, url, picture, tooLong, pending: !code && !tooLong };
 }

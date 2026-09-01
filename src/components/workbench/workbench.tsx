@@ -41,7 +41,7 @@ export function Workbench({ initialTape }: { initialTape: string }) {
             svg={tape.svg}
             dataUrl={tape.dataUrl}
             width={tape.width}
-            snippet={link.snippet}
+            url={link.url}
             picture={link.picture}
             tooLong={link.tooLong}
             pending={link.pending}
