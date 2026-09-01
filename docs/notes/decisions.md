@@ -94,8 +94,10 @@ breakpoint costs a couple of blank rows where it used to cost characters.
 So the editor copies two forms. The GitHub copy is a `<picture>` with one variant per
 viewport class, each variant's range starting at the narrowest column measured inside that
 class (both page kinds, one column of slack), so the reserve follows the screen: zero on a
-desktop, the phone price only on a phone. The browser downloads exactly one variant, so
-the extra sources cost nothing on the wire. The plain one-line `<img>` stays for anywhere
+desktop, the phone price only on a phone. A band only earns its line: neighbouring bands
+where the tape takes the same rows collapse into the narrower floor, and a tape that never
+wraps collapses all the way back to the one-line img. The browser downloads exactly one
+variant, so the sources that remain cost nothing on the wire. The plain one-line `<img>` stays for anywhere
 that is not GitHub, because the bands are GitHub's own layout and a site with a narrow
 column on a wide viewport would pick a variant wrapped too wide for its box. The fallback
 inside the picture is that same one-liner, which is also what a sanitizer that strips

@@ -54,7 +54,9 @@ The editor's **Copy for GitHub** wraps that line in a `<picture>` with one varia
 viewport class. An `<img>` box cannot give its spare height back, so the one-liner always
 reserves the height of its narrowest wrap; the picture keys the reserve on the screen
 instead, so a desktop is not paying for a phone. Every variant still reflows, which is why
-a mispredicted breakpoint costs a couple of blank rows and never a character.
+a mispredicted breakpoint costs a couple of blank rows and never a character. The block
+only grows as long as the tape needs: bands that would reserve the same height collapse,
+and a tape without wrapping lines stays a single line.
 
 Or use **Download SVG** and commit the file, which works with no service behind it.
 

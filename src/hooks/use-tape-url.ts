@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 
 import { embedPicture, embedSnippet } from '@/lib/embed';
 import { MAX_CODE, encodeTape } from '@/lib/encode';
-import { RENDERER_VERSION } from '@/lib/tapecast';
+import { RENDERER_VERSION, build, parse } from '@/lib/tapecast';
 
 const subscribe = () => () => {};
 
@@ -37,9 +37,15 @@ export function useTapeUrl(source: string, font: number) {
 
   // What goes in a GitHub README is a `<picture>` of one variant per viewport
   // class, so the reserved height follows the screen; the one-line `<img>`
-  // reflows the same way and is the safe form for anywhere else.
+  // reflows the same way and is the safe form for anywhere else. The picture
+  // asks how many rows the tape takes at a width, so bands that reserve the
+  // same height collapse and a tape that never wraps stays one line.
   const snippet = url ? embedSnippet(origin, code, font) : '';
-  const picture = url ? embedPicture(origin, code, font) : '';
+  const picture = url ? (() => {
+    const { cfg, cmds } = parse(source);
+    return embedPicture(origin, code, font, (cols) =>
+      Math.max(build({ ...cfg, cols }, cmds).rows, cfg.rows));
+  })() : '';
 
   return { code, url, snippet, picture, tooLong, pending: !code && !tooLong };
 }

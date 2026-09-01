@@ -71,21 +71,51 @@ export function embedSnippet(origin: string, code: string, font: number): string
  * different matter: every variant still reflows to whatever box it lands in,
  * so a misjudged breakpoint costs a couple of blank rows, never a character.
  *
- * The browser downloads exactly one variant, so the bands cost nothing on the
- * wire; what they buy is the reserve, which shrinks to the rows the band's own
- * floor needs. The narrow variant stays the `<img>` fallback, which is also
- * what a sanitizer that strips `<source>` leaves standing.
+ * A band only earns its line when it changes something: `rows` says how many
+ * rows the tape takes at a width, and neighbouring bands that reserve the same
+ * height collapse into the narrower one. A tape whose lines never wrap
+ * collapses all the way down to the one-line `<img>`. The browser downloads
+ * exactly one variant, so the bands that remain cost nothing on the wire, and
+ * the `<img>` fallback is also what a sanitizer that strips `<source>` leaves
+ * standing.
  */
-export function embedPicture(origin: string, code: string, font: number): string {
+export function embedPicture(
+  origin: string, code: string, font: number, rows: (cols: number) => number,
+): string {
   const hi = colsIn(WIDEST, font);
   // Every floor is at most WIDEST, so a band's lo never crosses hi.
   const src = (lo: number) =>
     `${origin}/t/v${RENDERER_VERSION}/w${lo}-${hi}/${code}.svg`;
+
+  // Walk narrowest first, the base included. Absorbing a band into the group
+  // below hands the group the narrower of the two floors, because the group's
+  // one variant now has to survive both stretches; that is only free when the
+  // tape takes the same rows at the narrower floor, the group's and the
+  // band's own. The floors zigzag (the sidebar takes the column back down at
+  // 768), so the minimum is taken rather than assumed.
+  const all: [viewport: number, floor: number][] = [[0, NARROWEST], ...[...BANDS].reverse()];
+  const kept: [viewport: number, lo: number][] = [];
+  for (const [viewport, floor] of all) {
+    const lo = colsUnder(floor, font);
+    const last = kept[kept.length - 1];
+    if (last) {
+      const merged = Math.min(last[1], lo);
+      if (rows(merged) === rows(last[1]) && rows(merged) === rows(lo)) {
+        last[1] = merged;
+        continue;
+      }
+    }
+    kept.push([viewport, lo]);
+  }
+
+  const [, base] = kept[0];
+  const img = `<img src="${src(base)}" width="100%" alt="demo">`;
+  if (kept.length === 1) return img;
   return [
     '<picture>',
-    ...BANDS.map(([viewport, floor]) =>
-      `  <source media="(min-width: ${viewport}px)" srcset="${src(colsUnder(floor, font))}">`),
-    `  <img src="${src(colsUnder(NARROWEST, font))}" width="100%" alt="demo">`,
+    ...kept.slice(1).reverse().map(([viewport, lo]) =>
+      `  <source media="(min-width: ${viewport}px)" srcset="${src(lo)}">`),
+    `  ${img}`,
     '</picture>',
   ].join('\n');
 }

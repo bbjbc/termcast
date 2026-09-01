@@ -27,6 +27,14 @@ export function ExportBar({ svg, snippet, picture, tooLong, pending }: ExportBar
     copy(text);
   }, [copy]);
 
+  // The picture form is several long addresses, and the person pasting it is
+  // not the only person who will read the README source. A comment, invisible
+  // in the rendered page, says why it is that shape; a tape that never wraps
+  // collapses to the one-line img and needs no explaining.
+  const github = picture.startsWith('<picture>')
+    ? `${t.exportBar.pictureComment}\n${picture}`
+    : picture;
+
   const download = useCallback(() => {
     const href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
     const a = document.createElement('a');
@@ -45,7 +53,7 @@ export function ExportBar({ svg, snippet, picture, tooLong, pending }: ExportBar
       )}
 
       <div className={s.actions}>
-        <Button variant="solid" disabled={!picture} onClick={() => grab(picture, 'github')}>
+        <Button variant="solid" disabled={!picture} onClick={() => grab(github, 'github')}>
           {copied && which === 'github' ? t.exportBar.copied : t.exportBar.copy}
         </Button>
         <Button disabled={!snippet} onClick={() => grab(snippet, 'plain')}>
