@@ -46,14 +46,14 @@
   min-width: 0;
   margin: 0;
   padding: 4px 13px 13px;
-  border: 1px solid var(--hair);
+  border: 1px solid var(--edge);
 }
 
 .group > legend {
   padding: 0 6px;
   margin-left: -3px;
-  color: var(--faint);
-  font-size: 10.5px;
+  color: var(--mid);
+  font-size: 14px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -83,8 +83,8 @@
 .fieldLabel {
   width: 76px;
   flex-shrink: 0;
-  color: var(--dim);
-  font-size: 11.5px;
+  color: var(--mid);
+  font-size: 12px;
 }
 
 .text {
@@ -130,7 +130,7 @@
 .color > input[type='color']::-webkit-color-swatch-wrapper { padding: 1px; }
 .color > input[type='color']::-webkit-color-swatch { border: 0; }
 
-.colorName { color: var(--faint); font-size: 11px; }
+.colorName { color: var(--mid); font-size: 12px; }
 .color[data-on='true'] .colorName { color: var(--fg); }
 
 .reset {
@@ -156,7 +156,7 @@
 
 .snippet {
   padding: 9px 11px;
-  border: 1px solid var(--hair);
+  border: 1px solid var(--edge);
   background: var(--sunken);
   color: var(--dim);
   font-size: 11.5px;
