@@ -25,7 +25,9 @@ const WIDEST = 838;      // flat from 1280 up on both page kinds
 const BANDS: [viewport: number, floor: number][] = [
   [1280, WIDEST],
   [1012, 578],
+  [900, 530],
   [768, 398],
+  [700, 602],
   [600, 502],
   [500, 418],
   [375, 293],

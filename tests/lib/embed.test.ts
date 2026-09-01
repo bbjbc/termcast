@@ -60,7 +60,7 @@ describe('embedPicture', () => {
     // 200 characters change row count at every floor, so every band earns its
     // line. The floors zigzag because the sidebar arrives at 768 and takes
     // the column back down; the lo values zigzag with them.
-    expect(los).toEqual([93, 62, 41, 53, 43, 28, 22]);
+    expect(los).toEqual([93, 56, 41, 53, 43, 28, 22]);
   });
 
   it('hands an absorbed stretch the narrower of the floors, so nothing clips', () => {
